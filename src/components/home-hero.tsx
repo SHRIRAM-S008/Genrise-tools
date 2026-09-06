@@ -12,8 +12,18 @@ const categoryCounts = toolCategories.map((c) => ({
 
 export function HomeHero() {
   return (
-    <section className="pt-16 pb-8">
-      <div className="mx-auto max-w-3xl px-4 text-center">
+    <section className="relative pt-16 pb-8">
+      {/* Grainy gradient background */}
+      <div
+        className="absolute inset-0 -z-10 bg-cover bg-center"
+        style={{
+          backgroundImage: "url(/hero-bg.png)",
+        }}
+      >
+        <div className="absolute inset-0 bg-background/85" />
+      </div>
+
+      <div className="mx-auto max-w-3xl px-4 text-center relative">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

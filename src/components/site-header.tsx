@@ -26,17 +26,17 @@ export function SiteHeader() {
           borderRadius: scrolled ? 999 : 0,
         }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className={`flex h-14 w-full items-center justify-between px-4 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 sm:px-6 ${
+        className={`relative flex h-14 w-full items-center justify-between px-4 transition-[background-color,box-shadow,backdrop-filter] duration-300 sm:px-6 ${
           scrolled
-            ? "border border-white/15 bg-background/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-xl dark:border-white/10"
-            : "border-b border-border/60 bg-background/80 backdrop-blur-md"
+            ? "bg-background/60 shadow-2xl backdrop-blur-xl"
+            : "bg-background/80 backdrop-blur-md"
         }`}
       >
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 font-black tracking-tight">
           <Image src="/logo.png" alt="GenRise" width={28} height={28} priority />
           GenRise
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex items-center gap-1 text-sm font-bold">
           <Link href="/tools" className="hidden rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-block">
             All Tools
           </Link>

@@ -11,10 +11,10 @@ export default function Home() {
   return (
     <>
       <StatsStrip />
+      <HomeHero />
       <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-6 px-4">
         <AdSlot className="mt-24" />
         <main className="flex w-full max-w-6xl flex-1 flex-col pb-20">
-          <HomeHero />
           <PopularToolsPreview />
           <KitsShowcase />
           <NewsletterCapture />

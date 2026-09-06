@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AmbientBackground } from "@/components/ambient-background";
+import { RegisterServiceWorker } from "@/components/register-sw";
 import { siteUrl, siteName, siteTagline } from "@/lib/toolSeo";
 
 const geistSans = Geist({
@@ -89,6 +90,12 @@ export const metadata: Metadata = {
   creator: "GenRise Tech",
   publisher: "GenRise Tech",
   category: "technology",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: siteName,
+  },
   other: {
     "ai:site-name": siteName,
     "ai:site-type": "tools",
@@ -125,6 +132,16 @@ const websiteJsonLd = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
 const itemListJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
@@ -152,6 +169,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
+        <RegisterServiceWorker />
         <AmbientBackground />
         <SiteHeader />
         {children}
