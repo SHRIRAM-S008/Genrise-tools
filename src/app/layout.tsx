@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { AmbientBackground } from "@/components/ambient-background";
 import { siteUrl, siteName, siteTagline } from "@/lib/toolSeo";
 
 const geistSans = Geist({
@@ -151,6 +152,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
+        <AmbientBackground />
         <SiteHeader />
         {children}
         <SiteFooter />

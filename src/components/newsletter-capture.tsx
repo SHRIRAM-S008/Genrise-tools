@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Check } from "lucide-react";
+import { Check } from "lucide-react";
 
 export function NewsletterCapture() {
   const [email, setEmail] = useState("");
@@ -11,7 +11,6 @@ export function NewsletterCapture() {
     e.preventDefault();
     if (!email.trim()) return;
     setStatus("loading");
-    // No backend yet — store locally so we can wire up later
     try {
       const existing = JSON.parse(localStorage.getItem("newsletter-signups") || "[]");
       existing.push({ email, date: new Date().toISOString() });
@@ -25,15 +24,14 @@ export function NewsletterCapture() {
 
   if (status === "done") {
     return (
-      <section className="py-8">
-        <div className="flex flex-col items-center gap-3 rounded-[28px] border border-primary/20 bg-primary/5 p-8 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Check className="size-6" />
+      <section className="py-10">
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-8 text-center">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Check className="size-5" />
           </div>
-          <h3 className="font-heading text-lg font-bold">You&rsquo;re in!</h3>
+          <h3 className="font-heading text-lg font-bold">You&rsquo;re in.</h3>
           <p className="max-w-sm text-sm text-muted-foreground">
-            We&rsquo;ll let you know when new tools launch. No spam, unsubscribe
-            anytime.
+            We&rsquo;ll email when new tools launch. No spam, unsubscribe anytime.
           </p>
         </div>
       </section>
@@ -41,23 +39,15 @@ export function NewsletterCapture() {
   }
 
   return (
-    <section className="py-8">
-      <div className="relative overflow-hidden rounded-[28px] border border-border bg-card p-8 sm:p-10">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-20 -right-20 size-64 rounded-full bg-primary/10 blur-3xl"
-        />
-        <div className="relative flex flex-col items-center gap-5 text-center">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Mail className="size-6" />
-          </div>
+    <section className="py-10">
+      <div className="rounded-xl border border-border bg-card p-8 sm:p-10">
+        <div className="flex flex-col items-center gap-5 text-center">
           <div>
             <h3 className="font-heading text-xl font-bold sm:text-2xl">
-              Get notified when we launch new tools
+              New tools, in your inbox
             </h3>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              Join the list — we email when new tools drop. No spam, no sales
-              pitches, just tools.
+              We email when new tools drop. No spam, no sales pitches, just tools.
             </p>
           </div>
           <form
@@ -70,12 +60,12 @@ export function NewsletterCapture() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="h-12 flex-1 rounded-xl border border-border bg-background px-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
+              className="h-11 flex-1 rounded-lg border border-border bg-background px-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="h-12 shrink-0 rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="h-11 shrink-0 rounded-lg bg-foreground px-6 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {status === "loading" ? "Joining…" : "Notify me"}
             </button>

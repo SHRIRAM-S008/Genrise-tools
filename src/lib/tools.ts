@@ -54,6 +54,10 @@ import {
   Briefcase,
   Code2,
   Image as ImageIcon,
+  FileType2,
+  Eraser,
+  Palette,
+  ScanText,
 } from "lucide-react";
 
 export type ToolCategory =
@@ -504,6 +508,40 @@ export const tools: ToolMeta[] = [
     icon: Film,
     category: "Audio & Video",
     kits: ["mediakit"],
+  },
+  {
+    slug: "pdf-to-word",
+    title: "PDF to Word",
+    description: "Convert PDF pages into an editable Word document.",
+    icon: FileType2,
+    category: "PDFs",
+    kits: ["pdfkit"],
+  },
+  {
+    slug: "background-remover",
+    title: "Image Background Remover",
+    description: "Remove image backgrounds instantly, on-device.",
+    icon: Eraser,
+    category: "Images",
+    popular: true,
+    kits: ["mediakit"],
+  },
+  {
+    slug: "color-palette-generator",
+    title: "Color Palette Generator",
+    description: "Extract a color palette from any image.",
+    icon: Palette,
+    category: "Images",
+    kits: ["mediakit"],
+  },
+  {
+    slug: "ocr-text-extractor",
+    title: "OCR Text Extractor",
+    description: "Pull text out of images and scanned PDFs.",
+    icon: ScanText,
+    category: "Data & Text",
+    popular: true,
+    kits: ["pdfkit", "devkit"],
   },
 ];
 

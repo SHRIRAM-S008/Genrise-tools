@@ -1,40 +1,54 @@
-import { Lock, Zap, Sparkles } from "lucide-react";
+import { Lock, Zap, Server } from "lucide-react";
 
-const features = [
+const pillars = [
   {
     icon: Lock,
     title: "Private by design",
-    description: "Every tool runs in your browser using Canvas, WASM, and File APIs. Your files never touch a server.",
+    body: "Every tool runs in your browser using Canvas, WASM, and File APIs. Your files never touch a server.",
   },
   {
     icon: Zap,
-    title: "Fast, no waiting",
-    description: "No upload, no queue, no processing on someone else's machine. Results appear instantly, locally.",
+    title: "Instant, not queued",
+    body: "No upload, no queue, no processing on someone else's machine. Results appear the moment you drop a file.",
   },
   {
-    icon: Sparkles,
-    title: "Always free",
-    description: "No sign-up, no paywalls, no watermarks on the basics. GenRise stays free for everyday tasks.",
+    icon: Server,
+    title: "No backend, by choice",
+    body: "If your browser can do it, we don't need a server to do it for you. That's the entire architecture.",
   },
 ];
 
 export function WhyGenRise() {
   return (
-    <section className="py-16">
-      <h2 className="text-center font-heading text-2xl font-bold sm:text-3xl">Why GenRise</h2>
-      <p className="mx-auto mt-2 max-w-lg text-center text-muted-foreground">
-        Built on one rule: if your browser can do it, we don&rsquo;t need a server to do it for you.
-      </p>
-      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {features.map((f) => (
-          <div key={f.title} className="rounded-2xl border border-border bg-card p-6">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <f.icon className="size-5" />
+    <section className="py-14">
+      <div className="grid gap-10 lg:grid-cols-[1fr_1.5fr] lg:gap-16">
+        {/* Left: statement */}
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">
+            Why GenRise
+          </h2>
+          <p className="mt-3 max-w-sm text-base leading-relaxed text-muted-foreground">
+            One rule: if your browser can do it, we don&rsquo;t need a server to
+            do it for you.
+          </p>
+        </div>
+
+        {/* Right: pillars as a stacked list, not cards */}
+        <div className="flex flex-col divide-y divide-border">
+          {pillars.map((p) => (
+            <div key={p.title} className="flex gap-5 py-6 first:pt-0 last:pb-0">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <p.icon className="size-5" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="font-heading text-base font-semibold">{p.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  {p.body}
+                </p>
+              </div>
             </div>
-            <h3 className="mt-4 font-heading font-semibold">{f.title}</h3>
-            <p className="mt-1.5 text-sm text-muted-foreground">{f.description}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

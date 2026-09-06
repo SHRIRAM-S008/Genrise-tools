@@ -71,7 +71,7 @@ export function ToolBrowser() {
           id="tool-search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search 53 tools…"
+          placeholder="Search 57 tools…"
           className="h-12 w-full rounded-2xl border border-border bg-card pr-16 pl-11 text-sm shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary/50 focus:shadow-[0_8px_30px_-8px_var(--color-primary)]"
         />
         <kbd className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
