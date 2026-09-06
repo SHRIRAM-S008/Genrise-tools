@@ -10,6 +10,7 @@ export function buildToolMetadata(tool: ToolMeta): Metadata {
   const title = `${tool.title} — Free Online Tool`;
   const description = `${tool.description} Free, private, and browser-based — no sign-up, no uploads to a server.`;
   const url = `${siteUrl}/tools/${tool.slug}`;
+  const ogImage = `${siteUrl}/api/og/${tool.slug}`;
 
   return {
     title,
@@ -34,11 +35,20 @@ export function buildToolMetadata(tool: ToolMeta): Metadata {
       siteName,
       type: "website",
       locale: "en_US",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${tool.title} — ${siteName}`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: `${title} | ${siteName}`,
       description,
+      images: [ogImage],
     },
     other: {
       "ai:site-name": siteName,

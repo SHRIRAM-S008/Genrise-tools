@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -34,20 +33,28 @@ export function SiteHeader() {
         }`}
       >
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <Image src="/logo.png" alt="GenRise" width={28} height={28} className="dark:invert" priority />
+          <Image src="/logo.png" alt="GenRise" width={28} height={28} priority />
           GenRise
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <Link href="/tools" className="hidden rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-block">
             All Tools
           </Link>
-          <Link href="/studentkit" className="hidden rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-block">
-            StudentKit
-          </Link>
           <Link href="/careerkit" className="hidden rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-block">
             CareerKit
           </Link>
-          <ThemeToggle />
+          <Link href="/studentkit" className="hidden rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-block">
+            StudentKit
+          </Link>
+          <Link href="/devkit" className="hidden rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:inline-block">
+            DevKit
+          </Link>
+          <Link href="/mediakit" className="hidden rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:inline-block">
+            MediaKit
+          </Link>
+          <Link href="/pdfkit" className="hidden rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:inline-block">
+            PDFKit
+          </Link>
         </nav>
       </motion.header>
     </div>

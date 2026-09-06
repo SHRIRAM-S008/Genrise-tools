@@ -21,9 +21,60 @@ import {
   Receipt,
   PackageCheck,
   GraduationCap,
+  Braces,
+  Binary,
+  Fingerprint,
+  KeyRound,
+  Link2,
+  Crop,
+  RotateCw,
+  Pipette,
+  LayoutGrid,
+  Scissors,
+  RotateCcw,
+  Calculator,
+  Cake,
+  Ruler,
+  HeartPulse,
+  CalendarRange,
+  Regex,
+  ShieldQuestion,
+  FileCode,
+  GitCompare,
+  Timer,
+  Wand2,
+  ImagePlus,
+  Disc3,
+  Dices,
+  Terminal,
+  AudioLines,
+  Mic,
+  Video,
+  Film,
+  Briefcase,
+  Code2,
+  Image as ImageIcon,
 } from "lucide-react";
 
-export type ToolCategory = "Images" | "PDFs" | "Documents" | "Data & Text" | "Privacy";
+export type ToolCategory =
+  | "Images"
+  | "PDFs"
+  | "Documents"
+  | "Data & Text"
+  | "Security & Privacy"
+  | "Developer"
+  | "Calculators"
+  | "Fun"
+  | "Audio & Video";
+
+export type KitSlug =
+  | "careerkit"
+  | "studentkit"
+  | "devkit"
+  | "mediakit"
+  | "privacykit"
+  | "dockit"
+  | "pdfkit";
 
 export interface ToolMeta {
   slug: string;
@@ -31,6 +82,8 @@ export interface ToolMeta {
   description: string;
   icon: LucideIcon;
   category: ToolCategory;
+  popular?: boolean;
+  kits?: KitSlug[];
 }
 
 export const tools: ToolMeta[] = [
@@ -40,6 +93,8 @@ export const tools: ToolMeta[] = [
     description: "Shrink JPG, PNG, or WebP files without leaving your browser.",
     icon: Shrink,
     category: "Images",
+    popular: true,
+    kits: ["mediakit"],
   },
   {
     slug: "resize-image",
@@ -47,6 +102,7 @@ export const tools: ToolMeta[] = [
     description: "Resize by pixels or percentage, with optional aspect-ratio lock.",
     icon: Scaling,
     category: "Images",
+    kits: ["mediakit"],
   },
   {
     slug: "convert-image",
@@ -54,6 +110,7 @@ export const tools: ToolMeta[] = [
     description: "Convert between JPG, PNG, and WebP.",
     icon: RefreshCw,
     category: "Images",
+    kits: ["mediakit"],
   },
   {
     slug: "target-kb",
@@ -61,6 +118,8 @@ export const tools: ToolMeta[] = [
     description: "Tell us the size you need — we compress your photo to fit.",
     icon: Target,
     category: "Images",
+    popular: true,
+    kits: ["mediakit", "careerkit", "studentkit"],
   },
   {
     slug: "passport-photo",
@@ -68,6 +127,7 @@ export const tools: ToolMeta[] = [
     description: "Crop and resize a photo to an exact passport, visa, or ID size.",
     icon: IdCard,
     category: "Images",
+    kits: ["mediakit", "careerkit", "studentkit"],
   },
   {
     slug: "print-sheet",
@@ -75,6 +135,7 @@ export const tools: ToolMeta[] = [
     description: "Arrange repeated photo copies on one printable page.",
     icon: Printer,
     category: "Images",
+    kits: ["mediakit"],
   },
   {
     slug: "signature-optimizer",
@@ -82,13 +143,48 @@ export const tools: ToolMeta[] = [
     description: "Resize a signature photo to exact dimensions and file size.",
     icon: PenTool,
     category: "Images",
+    kits: ["mediakit", "careerkit", "studentkit"],
+  },
+  {
+    slug: "image-cropper",
+    title: "Image Cropper",
+    description: "Crop images to any dimension right in your browser.",
+    icon: Crop,
+    category: "Images",
+    popular: true,
+    kits: ["mediakit"],
+  },
+  {
+    slug: "image-rotator",
+    title: "Image Rotator",
+    description: "Rotate or flip images by 90, 180, or 270 degrees.",
+    icon: RotateCw,
+    category: "Images",
+    kits: ["mediakit"],
+  },
+  {
+    slug: "color-picker",
+    title: "Color Picker from Image",
+    description: "Upload an image and pick exact pixel colors with hex codes.",
+    icon: Pipette,
+    category: "Images",
+    kits: ["mediakit"],
+  },
+  {
+    slug: "image-collage",
+    title: "Image Collage Maker",
+    description: "Combine multiple images into a single collage layout.",
+    icon: LayoutGrid,
+    category: "Images",
+    kits: ["mediakit"],
   },
   {
     slug: "metadata-remover",
     title: "Metadata Remover",
     description: "See and strip hidden camera, date, and GPS data from a photo.",
     icon: ShieldCheck,
-    category: "Privacy",
+    category: "Security & Privacy",
+    kits: ["mediakit", "privacykit"],
   },
   {
     slug: "image-to-pdf",
@@ -96,6 +192,7 @@ export const tools: ToolMeta[] = [
     description: "Combine one or more images into a single PDF.",
     icon: FileImage,
     category: "PDFs",
+    kits: ["pdfkit", "mediakit"],
   },
   {
     slug: "merge-pdf",
@@ -103,6 +200,8 @@ export const tools: ToolMeta[] = [
     description: "Combine multiple PDF files into one, in order.",
     icon: Combine,
     category: "PDFs",
+    popular: true,
+    kits: ["pdfkit", "careerkit", "studentkit"],
   },
   {
     slug: "compress-pdf",
@@ -110,6 +209,7 @@ export const tools: ToolMeta[] = [
     description: "Shrink a PDF's file size for easier sharing.",
     icon: FileDown,
     category: "PDFs",
+    kits: ["pdfkit", "careerkit", "studentkit"],
   },
   {
     slug: "pdf-organizer",
@@ -117,6 +217,32 @@ export const tools: ToolMeta[] = [
     description: "Reorder, rotate, or delete PDF pages, then export.",
     icon: LayoutList,
     category: "PDFs",
+    popular: true,
+    kits: ["pdfkit", "studentkit"],
+  },
+  {
+    slug: "split-pdf",
+    title: "Split PDF",
+    description: "Extract specific pages or split a PDF into separate files.",
+    icon: Scissors,
+    category: "PDFs",
+    kits: ["pdfkit"],
+  },
+  {
+    slug: "pdf-to-image",
+    title: "PDF to Image",
+    description: "Convert each PDF page into a downloadable image.",
+    icon: FileImage,
+    category: "PDFs",
+    kits: ["pdfkit"],
+  },
+  {
+    slug: "rotate-pdf",
+    title: "Rotate PDF Pages",
+    description: "Rotate all or selected pages of a PDF by 90-degree increments.",
+    icon: RotateCcw,
+    category: "PDFs",
+    kits: ["pdfkit"],
   },
   {
     slug: "qr-code",
@@ -124,6 +250,7 @@ export const tools: ToolMeta[] = [
     description: "Create a QR code for a URL, text, Wi-Fi, or contact info.",
     icon: QrCode,
     category: "Data & Text",
+    popular: true,
   },
   {
     slug: "file-info",
@@ -152,6 +279,7 @@ export const tools: ToolMeta[] = [
     description: "Word counts, case conversion, and line cleanup utilities.",
     icon: Type,
     category: "Data & Text",
+    kits: ["studentkit"],
   },
   {
     slug: "resume-builder",
@@ -159,6 +287,8 @@ export const tools: ToolMeta[] = [
     description: "Fill in your details and export a clean PDF resume.",
     icon: FileText,
     category: "Documents",
+    popular: true,
+    kits: ["dockit", "careerkit"],
   },
   {
     slug: "invoice-generator",
@@ -166,6 +296,7 @@ export const tools: ToolMeta[] = [
     description: "Create a simple, professional invoice PDF for a client.",
     icon: Receipt,
     category: "Documents",
+    kits: ["dockit", "careerkit"],
   },
   {
     slug: "application-pack",
@@ -173,6 +304,91 @@ export const tools: ToolMeta[] = [
     description: "Bundle your resume, photo, signature, and certificates into one ZIP.",
     icon: PackageCheck,
     category: "Documents",
+    kits: ["dockit", "careerkit", "studentkit"],
+  },
+  {
+    slug: "json-formatter",
+    title: "JSON Formatter",
+    description: "Format, validate, and minify JSON data instantly.",
+    icon: Braces,
+    category: "Developer",
+    kits: ["devkit"],
+  },
+  {
+    slug: "base64-codec",
+    title: "Base64 Encoder / Decoder",
+    description: "Encode text to Base64 or decode Base64 back to text.",
+    icon: Binary,
+    category: "Developer",
+    kits: ["devkit"],
+  },
+  {
+    slug: "uuid-generator",
+    title: "UUID Generator",
+    description: "Generate random UUIDs (v4) in bulk, instantly.",
+    icon: Fingerprint,
+    category: "Developer",
+    kits: ["devkit"],
+  },
+  {
+    slug: "password-generator",
+    title: "Password Generator",
+    description: "Generate strong, secure passwords with custom rules.",
+    icon: KeyRound,
+    category: "Security & Privacy",
+    popular: true,
+    kits: ["devkit", "privacykit"],
+  },
+  {
+    slug: "hash-generator",
+    title: "Hash Generator",
+    description: "Generate SHA-1, SHA-256, SHA-384, and SHA-512 hashes.",
+    icon: Fingerprint,
+    category: "Security & Privacy",
+    kits: ["devkit", "privacykit"],
+  },
+  {
+    slug: "url-encoder",
+    title: "URL Encoder / Decoder",
+    description: "Encode or decode URL components and query strings.",
+    icon: Link2,
+    category: "Developer",
+    kits: ["devkit"],
+  },
+  {
+    slug: "percentage-calculator",
+    title: "Percentage Calculator",
+    description: "Calculate percentages, increase, decrease, and ratios.",
+    icon: Calculator,
+    category: "Calculators",
+  },
+  {
+    slug: "age-calculator",
+    title: "Age Calculator",
+    description: "Calculate exact age in years, months, and days from a date.",
+    icon: Cake,
+    category: "Calculators",
+  },
+  {
+    slug: "unit-converter",
+    title: "Unit Converter",
+    description: "Convert between length, weight, temperature, and more.",
+    icon: Ruler,
+    category: "Calculators",
+  },
+  {
+    slug: "bmi-calculator",
+    title: "BMI Calculator",
+    description: "Calculate Body Mass Index from height and weight.",
+    icon: HeartPulse,
+    category: "Calculators",
+  },
+  {
+    slug: "date-difference",
+    title: "Date Difference Calculator",
+    description: "Find the exact number of days, weeks, or months between dates.",
+    icon: CalendarRange,
+    category: "Calculators",
   },
   {
     slug: "gpa-calculator",
@@ -180,7 +396,212 @@ export const tools: ToolMeta[] = [
     description: "Calculate your GPA on a standard 4.0 scale.",
     icon: GraduationCap,
     category: "Documents",
+    kits: ["dockit", "studentkit"],
+  },
+  {
+    slug: "regex-tester",
+    title: "Regex Tester",
+    description: "Test regular expressions against sample text with live match highlighting.",
+    icon: Regex,
+    category: "Developer",
+    kits: ["devkit"],
+  },
+  {
+    slug: "jwt-decoder",
+    title: "JWT Decoder",
+    description: "Decode a JSON Web Token's header and payload instantly.",
+    icon: ShieldQuestion,
+    category: "Developer",
+    kits: ["devkit"],
+  },
+  {
+    slug: "markdown-previewer",
+    title: "Markdown Previewer",
+    description: "Write Markdown and see the rendered HTML preview live.",
+    icon: FileCode,
+    category: "Developer",
+    kits: ["devkit", "dockit"],
+  },
+  {
+    slug: "text-diff-checker",
+    title: "Text Diff Checker",
+    description: "Compare two blocks of text and highlight what changed.",
+    icon: GitCompare,
+    category: "Developer",
+    kits: ["devkit"],
+  },
+  {
+    slug: "cron-explainer",
+    title: "Cron Expression Explainer",
+    description: "Turn a cron expression into plain English and see upcoming run times.",
+    icon: Timer,
+    category: "Developer",
+    kits: ["devkit"],
+  },
+  {
+    slug: "ascii-art-generator",
+    title: "ASCII Art Generator",
+    description: "Turn any image into text-based ASCII art.",
+    icon: Wand2,
+    category: "Fun",
+  },
+  {
+    slug: "meme-generator",
+    title: "Meme Generator",
+    description: "Add top and bottom captions to an image and download your meme.",
+    icon: ImagePlus,
+    category: "Fun",
+  },
+  {
+    slug: "random-picker-wheel",
+    title: "Random Picker Wheel",
+    description: "Spin a wheel to randomly pick from your list of options.",
+    icon: Disc3,
+    category: "Fun",
+  },
+  {
+    slug: "dice-roller",
+    title: "Dice Roller & Coin Flip",
+    description: "Roll virtual dice or flip a coin with true randomness.",
+    icon: Dices,
+    category: "Fun",
+  },
+  {
+    slug: "hacker-terminal",
+    title: "Fake Hacker Terminal",
+    description: "Play back any text as an animated hacker-style terminal typing effect.",
+    icon: Terminal,
+    category: "Fun",
+  },
+  {
+    slug: "audio-trimmer",
+    title: "Audio Trimmer",
+    description: "Trim an audio file to the exact section you need and export it.",
+    icon: AudioLines,
+    category: "Audio & Video",
+    kits: ["mediakit"],
+  },
+  {
+    slug: "voice-recorder",
+    title: "Voice Recorder",
+    description: "Record audio from your microphone and download it.",
+    icon: Mic,
+    category: "Audio & Video",
+    kits: ["mediakit"],
+  },
+  {
+    slug: "screen-recorder",
+    title: "Screen Recorder",
+    description: "Record your screen and download the video, entirely in your browser.",
+    icon: Video,
+    category: "Audio & Video",
+    kits: ["mediakit"],
+  },
+  {
+    slug: "video-to-gif",
+    title: "Video to GIF Converter",
+    description: "Convert a video clip into an animated GIF.",
+    icon: Film,
+    category: "Audio & Video",
+    kits: ["mediakit"],
   },
 ];
 
-export const toolCategories: ToolCategory[] = ["Images", "PDFs", "Documents", "Data & Text", "Privacy"];
+export const toolCategories: ToolCategory[] = [
+  "Images",
+  "PDFs",
+  "Documents",
+  "Data & Text",
+  "Security & Privacy",
+  "Developer",
+  "Calculators",
+  "Fun",
+  "Audio & Video",
+];
+
+export interface KitMeta {
+  slug: KitSlug;
+  title: string;
+  tagline: string;
+  description: string;
+  icon: LucideIcon;
+  accent: string;
+  iconClass: string;
+}
+
+export const kits: KitMeta[] = [
+  {
+    slug: "careerkit",
+    title: "CareerKit",
+    tagline: "Land your next job",
+    description:
+      "Build your resume, optimize your photo, and pack every document your next job application needs.",
+    icon: Briefcase,
+    accent: "from-orange-500/20 via-orange-500/5 to-transparent",
+    iconClass: "bg-orange-500/15 text-orange-600 dark:text-orange-400",
+  },
+  {
+    slug: "studentkit",
+    title: "StudentKit",
+    tagline: "Apply with confidence",
+    description:
+      "Application photos, signatures, certificates, and GPA tools — bundled for college and scholarship applications.",
+    icon: GraduationCap,
+    accent: "from-violet-500/20 via-violet-500/5 to-transparent",
+    iconClass: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
+  },
+  {
+    slug: "devkit",
+    title: "DevKit",
+    tagline: "Your daily encoding toolbox",
+    description:
+      "JSON, Base64, UUIDs, regex, JWT, cron, and more — the everyday developer utilities, all in one place.",
+    icon: Code2,
+    accent: "from-cyan-500/20 via-cyan-500/5 to-transparent",
+    iconClass: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400",
+  },
+  {
+    slug: "mediakit",
+    title: "MediaKit",
+    tagline: "Edit images & media",
+    description:
+      "Compress, resize, crop, convert, and collage images — plus trim audio, record video, and make GIFs.",
+    icon: ImageIcon,
+    accent: "from-blue-500/20 via-blue-500/5 to-transparent",
+    iconClass: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+  },
+  {
+    slug: "pdfkit",
+    title: "PDFKit",
+    tagline: "Every PDF operation",
+    description:
+      "Merge, split, compress, rotate, organize, and convert PDF pages — the complete PDF toolkit.",
+    icon: FileText,
+    accent: "from-orange-500/20 via-orange-500/5 to-transparent",
+    iconClass: "bg-orange-500/15 text-orange-600 dark:text-orange-400",
+  },
+  {
+    slug: "privacykit",
+    title: "PrivacyKit",
+    tagline: "Strip & secure",
+    description:
+      "Remove hidden metadata from photos, generate strong passwords, and hash data — all on-device.",
+    icon: ShieldCheck,
+    accent: "from-rose-500/20 via-rose-500/5 to-transparent",
+    iconClass: "bg-rose-500/15 text-rose-600 dark:text-rose-400",
+  },
+  {
+    slug: "dockit",
+    title: "DocKit",
+    tagline: "Create documents",
+    description:
+      "Build resumes, invoices, and application packs, calculate GPA, and preview Markdown — document creation in one place.",
+    icon: FileText,
+    accent: "from-violet-500/20 via-violet-500/5 to-transparent",
+    iconClass: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
+  },
+];
+
+export function toolsByKit(kitSlug: KitSlug): ToolMeta[] {
+  return tools.filter((t) => t.kits?.includes(kitSlug));
+}
