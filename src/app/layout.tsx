@@ -107,9 +107,7 @@ const organizationJsonLd = {
   description,
   logo: `${siteUrl}/logo.png`,
   sameAs: [
-    "https://www.linkedin.com/company/genrisetech",
-    "https://twitter.com/genrisetech",
-    "https://github.com/genrisetech",
+    "https://github.com/SHRIRAM-S008/Genrise-tools",
   ],
 };
 
@@ -119,6 +117,7 @@ const websiteJsonLd = {
   name: siteName,
   url: siteUrl,
   description,
+  sameAs: "https://github.com/SHRIRAM-S008/Genrise-tools",
   potentialAction: {
     "@type": "SearchAction",
     target: `${siteUrl}/?q={search_term_string}`,

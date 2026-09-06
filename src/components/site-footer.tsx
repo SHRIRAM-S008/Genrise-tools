@@ -68,6 +68,7 @@ export function SiteFooter() {
               <Link href="/tools" className="hover:text-primary">All Tools</Link>
               <Link href="/studentkit" className="hover:text-primary">StudentKit</Link>
               <Link href="/careerkit" className="hover:text-primary">CareerKit</Link>
+              <a href="https://github.com/SHRIRAM-S008/Genrise-tools" target="_blank" rel="noopener noreferrer" className="hover:text-primary">GitHub</a>
             </div>
           </div>
         </div>

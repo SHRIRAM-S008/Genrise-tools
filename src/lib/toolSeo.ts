@@ -171,6 +171,7 @@ export function toolJsonLd(tool: ToolMeta) {
       url,
       applicationCategory: "BrowserApplication",
       operatingSystem: "Any (runs in web browser)",
+      codeRepository: "https://github.com/SHRIRAM-S008/Genrise-tools",
       offers: {
         "@type": "Offer",
         price: "0",
