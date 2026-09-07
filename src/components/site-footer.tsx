@@ -1,30 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
 import { tools, toolCategories, kits } from "@/lib/tools";
+import { InstallCta } from "@/components/install-cta";
 
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-border bg-muted/30">
       <div className="mx-auto max-w-6xl px-4 py-12">
-        {/* CTA strip */}
-        <div className="mb-12 flex flex-col items-center justify-between gap-6 rounded-xl bg-neutral-950 px-8 py-10 text-center sm:flex-row sm:text-left">
-          <div>
-            <h2 className="font-heading text-xl font-bold text-white sm:text-2xl">
-              Every tool, free, forever.
-            </h2>
-            <p className="mt-1.5 max-w-md text-sm text-white/50">
-              No account, no upload, no waiting. Just open and use.
-            </p>
-          </div>
-          <Link
-            href="/tools"
-            className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition-all hover:gap-3"
-          >
-            Browse all tools
-            <ArrowRight className="size-4" />
-          </Link>
-        </div>
+        <InstallCta />
 
         {/* Links grid */}
         <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
