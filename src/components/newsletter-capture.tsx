@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { motion } from "motion/react";
+import { Check, Mail } from "lucide-react";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 export function NewsletterCapture() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const reducedMotion = useReducedMotion();
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,35 +27,60 @@ export function NewsletterCapture() {
 
   if (status === "done") {
     return (
-      <section className="py-10">
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-8 text-center">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Check className="size-5" />
+      <section className="py-10 sm:py-14">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={
+            reducedMotion
+              ? { duration: 0 }
+              : { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const }
+          }
+          className="flex flex-col items-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center sm:p-10"
+        >
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Check className="size-6" />
           </div>
-          <h3 className="font-heading text-lg font-bold">You&rsquo;re in.</h3>
+          <h3 className="font-heading text-xl font-bold sm:text-2xl">You&rsquo;re in.</h3>
           <p className="max-w-sm text-sm text-muted-foreground">
             We&rsquo;ll email when new tools launch. No spam, unsubscribe anytime.
           </p>
-        </div>
+        </motion.div>
       </section>
     );
   }
 
   return (
-    <section className="py-10">
-      <div className="rounded-xl border border-border bg-card p-8 sm:p-10">
-        <div className="flex flex-col items-center gap-5 text-center">
+    <section className="py-10 sm:py-14">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={
+          reducedMotion
+            ? { duration: 0 }
+            : { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const }
+        }
+        className="overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/[0.07] via-card to-card p-6 shadow-sm sm:p-10"
+      >
+        <div className="flex flex-col items-center gap-5 text-center sm:gap-6">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Mail className="size-6" />
+          </div>
+
           <div>
-            <h3 className="font-heading text-xl font-bold sm:text-2xl">
+            <h3 className="font-heading text-2xl font-bold tracking-tight text-balance sm:text-3xl">
               New tools, in your inbox
             </h3>
-            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+            <p className="mx-auto mt-2 max-w-md text-pretty text-sm text-muted-foreground sm:text-base">
               We email when new tools drop. No spam, no sales pitches, just tools.
             </p>
           </div>
+
           <form
             onSubmit={submit}
-            className="flex w-full max-w-md flex-col gap-2 sm:flex-row"
+            className="flex w-full max-w-md flex-col gap-3 sm:flex-row"
           >
             <input
               type="email"
@@ -60,26 +88,29 @@ export function NewsletterCapture() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="h-11 flex-1 rounded-lg border border-border bg-background px-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
+              aria-label="Email address"
+              className="h-12 w-full flex-1 rounded-xl border border-border bg-background px-4 text-base outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11 sm:text-sm"
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="h-11 shrink-0 rounded-lg bg-foreground px-6 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="h-12 w-full shrink-0 rounded-xl bg-foreground px-6 text-base font-semibold text-background transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 sm:h-11 sm:w-auto sm:text-sm"
             >
               {status === "loading" ? "Joining…" : "Notify me"}
             </button>
           </form>
+
           {status === "error" && (
-            <p className="text-sm text-rose-500">
+            <p className="text-sm text-destructive">
               Something went wrong. Please try again.
             </p>
           )}
+
           <p className="text-xs text-muted-foreground">
             Free forever. Unsubscribe anytime.
           </p>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
