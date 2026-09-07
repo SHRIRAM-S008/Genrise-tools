@@ -10,7 +10,7 @@ export function buildToolMetadata(tool: ToolMeta): Metadata {
   const title = `${tool.title} — Free Online Tool`;
   const description = `${tool.description} Free, private, and browser-based — no sign-up, no uploads to a server.`;
   const url = `${siteUrl}/tools/${tool.slug}`;
-  const ogImage = `${siteUrl}/api/og/${tool.slug}`;
+  const ogImage = `${siteUrl}/logo.avif`;
 
   return {
     title,

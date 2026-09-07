@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/logo.png",
+        url: "/logo.avif",
         width: 512,
         height: 512,
         alt: siteName,
@@ -86,7 +86,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: ["/logo.png"],
+    images: ["/logo.avif"],
   },
   authors: [{ name: "GenRise Tech" }],
   creator: "GenRise Tech",
