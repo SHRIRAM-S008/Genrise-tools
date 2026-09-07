@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
+import { motion } from "motion/react";
 import { Zap, ArrowRight } from "lucide-react";
 import { getToolSample, type ImageArt, type ToolSample } from "@/lib/tool-samples";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 interface ToolSampleProps {
   slug: string;
@@ -10,12 +12,19 @@ interface ToolSampleProps {
 
 export function ToolSample({ slug }: ToolSampleProps) {
   const sample = useMemo(() => getToolSample(slug), [slug]);
+  const reducedMotion = useReducedMotion();
   if (!sample) return null;
 
   return (
-    <section
+    <motion.section
       aria-label="Sample output"
       className="mt-8 rounded-xl border border-border bg-card/60 p-4 sm:p-5"
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={
+        reducedMotion ? { duration: 0 } : { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const }
+      }
     >
       <div className="mb-3 flex items-center gap-2">
         <Zap className="size-4 text-primary" />
@@ -33,7 +42,7 @@ export function ToolSample({ slug }: ToolSampleProps) {
       <p className="mt-1 text-[11px] text-muted-foreground/70">
         Sample output — your files never leave your device.
       </p>
-    </section>
+    </motion.section>
   );
 }
 

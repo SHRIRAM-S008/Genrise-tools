@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 import { Search, Share2, Link2, Check } from "lucide-react";
 import { tools, toolCategories, type ToolCategory, type ToolMeta } from "@/lib/tools";
-import { categoryTileClass } from "@/lib/categoryStyles";
+import { categoryTileClass, categoryGlowClass } from "@/lib/categoryStyles";
 
 type Filter = "All" | ToolCategory;
 
@@ -54,7 +55,7 @@ function useLongPress(onLongPress: () => void, ms = 480) {
       onLongPress();
     },
     onClickCapture,
-    style: { WebkitTouchCallout: "none" } as React.CSSProperties,
+    style: { WebkitTouchCallout: "none" } as CSSProperties,
   };
 }
 
@@ -64,15 +65,26 @@ function PopularToolCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActi
     <Link
       href={`/tools/${tool.slug}`}
       {...longPress}
-      className="group flex w-[132px] shrink-0 snap-start flex-col items-start gap-2.5 rounded-2xl border border-border/70 bg-card/70 p-3.5 transition-all select-none active:scale-[0.98] sm:w-auto sm:flex-row sm:items-center sm:p-4 sm:hover:-translate-y-0.5 sm:hover:border-primary/40 sm:hover:shadow-lg"
+      className="group relative flex w-[132px] shrink-0 snap-start flex-col items-start gap-2.5 overflow-hidden rounded-2xl border border-border/70 bg-card/70 p-3.5 transition-all duration-200 select-none active:scale-[0.98] sm:w-auto sm:flex-row sm:items-center sm:p-4 sm:hover:-translate-y-0.5 sm:hover:border-primary/30 sm:hover:bg-card sm:hover:shadow-lg"
+      style={{ "--spotlight": categoryGlowClass[tool.category] } as CSSProperties}
     >
       <div
-        className={`flex size-9 shrink-0 items-center justify-center rounded-xl sm:size-10 ${categoryTileClass[tool.category]}`}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          background:
+            "radial-gradient(220px circle at var(--x, 50%) var(--y, 50%), var(--spotlight), transparent 50%)",
+        }}
+      />
+      <div
+        className={`relative z-10 flex size-9 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 sm:size-10 ${categoryTileClass[tool.category]}`}
       >
         <tool.icon className="size-4.5 sm:size-5" strokeWidth={2} />
       </div>
-      <div className="min-w-0">
-        <p className="line-clamp-2 text-sm font-medium sm:truncate sm:leading-normal">{tool.title}</p>
+      <div className="relative z-10 min-w-0">
+        <p className="line-clamp-2 text-sm font-medium transition-colors group-hover:text-foreground sm:truncate sm:leading-normal">
+          {tool.title}
+        </p>
       </div>
     </Link>
   );
@@ -80,15 +92,38 @@ function PopularToolCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActi
 
 function ToolGridCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActions: (t: ToolMeta) => void }) {
   const longPress = useLongPress(() => onQuickActions(tool));
+
+  function onMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--x", `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty("--y", `${e.clientY - rect.top}px`);
+  }
+
+  function onMouseLeave(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.currentTarget.style.setProperty("--x", "50%");
+    e.currentTarget.style.setProperty("--y", "50%");
+  }
+
   return (
     <Link
       href={`/tools/${tool.slug}`}
       {...longPress}
-      className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-border/70 bg-card/70 p-4 transition-all duration-300 select-none active:scale-[0.98] sm:rounded-[28px] sm:p-5 sm:hover:-translate-y-1 sm:hover:border-transparent sm:hover:shadow-2xl sm:hover:shadow-primary/10"
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-border/70 bg-card/70 p-4 transition-all duration-300 select-none active:scale-[0.98] sm:rounded-[28px] sm:p-5 sm:hover:-translate-y-1 sm:hover:border-primary/20 sm:hover:bg-card sm:hover:shadow-2xl sm:hover:shadow-primary/5"
+      style={{ "--spotlight": categoryGlowClass[tool.category] } as CSSProperties}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:rounded-[28px]"
+        className="pointer-events-none absolute inset-0 z-0 rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:rounded-[28px]"
+        style={{
+          background:
+            "radial-gradient(420px circle at var(--x, 50%) var(--y, 50%), var(--spotlight), transparent 45%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0 rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:rounded-[28px]"
         style={{
           padding: 1,
           background: "linear-gradient(135deg, var(--color-primary), transparent 60%)",
@@ -97,15 +132,19 @@ function ToolGridCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActions
           maskComposite: "exclude",
         }}
       />
-      <div
-        className={`flex size-11 items-center justify-center rounded-2xl shadow-inner sm:size-14 ${categoryTileClass[tool.category]}`}
-      >
-        <tool.icon className="size-5 sm:size-6" strokeWidth={2} />
+      <div className="relative z-10 flex flex-1 flex-col">
+        <div
+          className={`flex size-11 items-center justify-center rounded-2xl shadow-inner transition-transform duration-300 group-hover:scale-110 sm:size-14 ${categoryTileClass[tool.category]}`}
+        >
+          <tool.icon className="size-5 sm:size-6" strokeWidth={2} />
+        </div>
+        <h3 className="mt-3 font-heading text-sm font-semibold transition-colors group-hover:text-primary sm:mt-4 sm:text-base">
+          {tool.title}
+        </h3>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:mt-1.5 sm:text-sm">
+          {tool.description}
+        </p>
       </div>
-      <h3 className="mt-3 font-heading text-sm font-semibold sm:mt-4 sm:text-base">{tool.title}</h3>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:mt-1.5 sm:text-sm">
-        {tool.description}
-      </p>
     </Link>
   );
 }
@@ -115,6 +154,7 @@ export function ToolBrowser() {
   const [filter, setFilter] = useState<Filter>("All");
   const [quickTool, setQuickTool] = useState<ToolMeta | null>(null);
   const [copied, setCopied] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -206,6 +246,7 @@ export function ToolBrowser() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
+            transition={reducedMotion ? { duration: 0 } : { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const }}
             className="mb-10 overflow-hidden"
           >
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -244,7 +285,11 @@ export function ToolBrowser() {
                 key={tool.slug}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.3) }}
+                transition={
+                  reducedMotion
+                    ? { duration: 0 }
+                    : { duration: 0.25, delay: Math.min(i * 0.025, 0.25), ease: [0.22, 1, 0.36, 1] as const }
+                }
               >
                 <ToolGridCard tool={tool} onQuickActions={setQuickTool} />
               </motion.div>
@@ -269,7 +314,7 @@ export function ToolBrowser() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 24 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] as const }}
               className="fixed inset-x-3 z-[61] overflow-hidden rounded-3xl border border-border bg-card p-3 shadow-2xl"
               style={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom))" }}
             >
