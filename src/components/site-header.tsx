@@ -35,7 +35,7 @@ export function SiteHeader() {
         }`}
       >
         <Link href="/" className="flex shrink-0 items-center gap-2 font-black tracking-tight">
-          <Image src="/logo.png" alt="GenRise" width={402} height={205} className="h-7 w-auto" priority />
+          <Image src="/logo.png" alt="GenRise" width={740} height={376} className="h-7 w-auto dark:invert" priority />
           <span className={scrolled ? "hidden sm:inline" : ""}>GenRise</span>
         </Link>
         <nav className="hidden items-center gap-1 text-sm font-bold sm:flex">

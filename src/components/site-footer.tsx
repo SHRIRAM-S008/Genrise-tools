@@ -13,7 +13,7 @@ export function SiteFooter() {
         <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
           <div className="max-w-xs">
             <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-              <Image src="/logo.png" alt="GenRise" width={402} height={205} className="h-6 w-auto" />
+              <Image src="/logo.png" alt="GenRise" width={740} height={376} className="h-6 w-auto dark:invert" />
               GenRise
             </Link>
             <p className="mt-3 text-sm text-muted-foreground">
