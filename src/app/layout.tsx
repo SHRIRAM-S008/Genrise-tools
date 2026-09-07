@@ -8,6 +8,7 @@ import { SearchOverlayProvider } from "@/components/search-overlay";
 import { AmbientBackground } from "@/components/ambient-background";
 import { RegisterServiceWorker } from "@/components/register-sw";
 import { InstallPrompt } from "@/components/install-prompt";
+import { PwaInstallProvider } from "@/components/pwa-install-context";
 import { siteUrl, siteName, siteTagline } from "@/lib/toolSeo";
 
 const geistSans = Geist({
@@ -172,15 +173,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
-        <RegisterServiceWorker />
-        <AmbientBackground />
-        <SearchOverlayProvider>
-          <SiteHeader />
-          {children}
-          <SiteFooter />
-          <BottomNav />
-          <InstallPrompt />
-        </SearchOverlayProvider>
+        <PwaInstallProvider>
+          <RegisterServiceWorker />
+          <AmbientBackground />
+          <SearchOverlayProvider>
+            <SiteHeader />
+            {children}
+            <SiteFooter />
+            <BottomNav />
+            <InstallPrompt />
+          </SearchOverlayProvider>
+        </PwaInstallProvider>
       </body>
     </html>
   );

@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { Home, LayoutGrid, Search, Menu, ArrowRight } from "lucide-react";
+import { Home, LayoutGrid, Search, Menu, ArrowRight, Download } from "lucide-react";
 import { useSearchOverlay } from "@/components/search-overlay";
+import { usePwaInstall } from "@/components/pwa-install-context";
 
 const moreLinks = [
   { href: "/careerkit", label: "CareerKit" },
@@ -20,7 +21,9 @@ export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { openSearch } = useSearchOverlay();
+  const { canInstall, isIos, prompt } = usePwaInstall();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [iosHint, setIosHint] = useState(false);
 
   const isHome = pathname === "/";
   const isTools = pathname === "/tools";
@@ -32,6 +35,16 @@ export function BottomNav() {
     { key: "search", label: "Search", icon: Search, active: false, action: true, onClick: openSearch },
     { key: "more", label: "Kits", icon: Menu, active: isKit || moreOpen, action: false, onClick: () => setMoreOpen((v) => !v) },
   ];
+
+  async function handleInstall() {
+    if (isIos) {
+      setIosHint(true);
+      return;
+    }
+    if (!canInstall) return;
+    const ok = await prompt();
+    if (ok) setMoreOpen(false);
+  }
 
   return (
     <>
@@ -70,6 +83,25 @@ export function BottomNav() {
                   </Link>
                 ))}
               </nav>
+
+              {canInstall && (
+                <>
+                  <div className="mx-4 my-2 h-px bg-border" />
+                  {iosHint && (
+                    <p className="px-4 pb-2 text-xs text-muted-foreground">
+                      Tap Share, then Add to Home Screen.
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleInstall}
+                    className="group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-base font-semibold text-foreground transition-colors active:bg-accent"
+                  >
+                    Install app
+                    <Download className="size-4 text-muted-foreground transition-transform group-active:translate-x-0.5" />
+                  </button>
+                </>
+              )}
             </motion.div>
           </>
         )}
