@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { SearchOverlayProvider } from "@/components/search-overlay";
 import { AmbientBackground } from "@/components/ambient-background";
 import { RegisterServiceWorker } from "@/components/register-sw";
+import { InstallPrompt } from "@/components/install-prompt";
 import { siteUrl, siteName, siteTagline } from "@/lib/toolSeo";
 
 const geistSans = Geist({
@@ -178,6 +179,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
           <SiteFooter />
           <BottomNav />
+          <InstallPrompt />
         </SearchOverlayProvider>
       </body>
     </html>
