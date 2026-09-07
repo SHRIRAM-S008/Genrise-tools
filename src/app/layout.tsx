@@ -3,6 +3,8 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { BottomNav } from "@/components/bottom-nav";
+import { SearchOverlayProvider } from "@/components/search-overlay";
 import { AmbientBackground } from "@/components/ambient-background";
 import { RegisterServiceWorker } from "@/components/register-sw";
 import { siteUrl, siteName, siteTagline } from "@/lib/toolSeo";
@@ -156,7 +158,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-0">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
@@ -171,9 +173,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <RegisterServiceWorker />
         <AmbientBackground />
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+        <SearchOverlayProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+          <BottomNav />
+        </SearchOverlayProvider>
       </body>
     </html>
   );

@@ -51,7 +51,14 @@ export function AmbientBackground() {
       }
     }
 
-    function animate() {
+    const FRAME_INTERVAL = 1000 / 24; // subtle motion — no need for 60fps
+    let lastTime = 0;
+
+    function animate(now: number) {
+      animationRef.current = requestAnimationFrame(animate);
+      if (now - lastTime < FRAME_INTERVAL) return;
+      lastTime = now;
+
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
 
@@ -85,8 +92,18 @@ export function AmbientBackground() {
         ctx.arc(shape.x, shape.y, shape.size, 0, Math.PI * 2);
         ctx.fill();
       });
+    }
 
+    function start() {
+      if (animationRef.current) return;
       animationRef.current = requestAnimationFrame(animate);
+    }
+
+    function stop() {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = undefined;
+      }
     }
 
     // Check for reduced motion preference
@@ -94,16 +111,25 @@ export function AmbientBackground() {
 
     resize();
     if (!prefersReducedMotion) {
-      animate();
+      start();
+    }
+
+    function onVisibilityChange() {
+      if (document.hidden) {
+        stop();
+      } else if (!prefersReducedMotion) {
+        lastTime = 0;
+        start();
+      }
     }
 
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
       window.removeEventListener("resize", resize);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      stop();
     };
   }, []);
 

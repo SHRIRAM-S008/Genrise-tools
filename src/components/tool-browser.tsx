@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { Search } from "lucide-react";
-import { tools, toolCategories, type ToolCategory } from "@/lib/tools";
+import { Search, Share2, Link2, Check } from "lucide-react";
+import { tools, toolCategories, type ToolCategory, type ToolMeta } from "@/lib/tools";
 import { categoryTileClass } from "@/lib/categoryStyles";
 
 type Filter = "All" | ToolCategory;
@@ -18,9 +18,103 @@ const taskChips = [
   { label: "Stay private", kit: "privacykit" as const },
 ];
 
+const edgeFade =
+  "[mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]";
+
+/** Long-press (or right-click) to trigger a callback without also firing the wrapping Link's click. */
+function useLongPress(onLongPress: () => void, ms = 480) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const triggeredRef = useRef(false);
+
+  function start() {
+    triggeredRef.current = false;
+    timerRef.current = setTimeout(() => {
+      triggeredRef.current = true;
+      if (navigator.vibrate) navigator.vibrate(8);
+      onLongPress();
+    }, ms);
+  }
+  function clear() {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }
+  function onClickCapture(e: React.MouseEvent) {
+    if (triggeredRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+
+  return {
+    onPointerDown: start,
+    onPointerUp: clear,
+    onPointerLeave: clear,
+    onPointerCancel: clear,
+    onContextMenu: (e: React.MouseEvent) => {
+      e.preventDefault();
+      onLongPress();
+    },
+    onClickCapture,
+    style: { WebkitTouchCallout: "none" } as React.CSSProperties,
+  };
+}
+
+function PopularToolCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActions: (t: ToolMeta) => void }) {
+  const longPress = useLongPress(() => onQuickActions(tool));
+  return (
+    <Link
+      href={`/tools/${tool.slug}`}
+      {...longPress}
+      className="group flex w-[132px] shrink-0 snap-start flex-col items-start gap-2.5 rounded-2xl border border-border/70 bg-card/70 p-3.5 transition-all select-none active:scale-[0.98] sm:w-auto sm:flex-row sm:items-center sm:p-4 sm:hover:-translate-y-0.5 sm:hover:border-primary/40 sm:hover:shadow-lg"
+    >
+      <div
+        className={`flex size-9 shrink-0 items-center justify-center rounded-xl sm:size-10 ${categoryTileClass[tool.category]}`}
+      >
+        <tool.icon className="size-4.5 sm:size-5" strokeWidth={2} />
+      </div>
+      <div className="min-w-0">
+        <p className="line-clamp-2 text-sm font-medium sm:truncate sm:leading-normal">{tool.title}</p>
+      </div>
+    </Link>
+  );
+}
+
+function ToolGridCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActions: (t: ToolMeta) => void }) {
+  const longPress = useLongPress(() => onQuickActions(tool));
+  return (
+    <Link
+      href={`/tools/${tool.slug}`}
+      {...longPress}
+      className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-border/70 bg-card/70 p-4 transition-all duration-300 select-none active:scale-[0.98] sm:rounded-[28px] sm:p-5 sm:hover:-translate-y-1 sm:hover:border-transparent sm:hover:shadow-2xl sm:hover:shadow-primary/10"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:rounded-[28px]"
+        style={{
+          padding: 1,
+          background: "linear-gradient(135deg, var(--color-primary), transparent 60%)",
+          WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude",
+        }}
+      />
+      <div
+        className={`flex size-11 items-center justify-center rounded-2xl shadow-inner sm:size-14 ${categoryTileClass[tool.category]}`}
+      >
+        <tool.icon className="size-5 sm:size-6" strokeWidth={2} />
+      </div>
+      <h3 className="mt-3 font-heading text-sm font-semibold sm:mt-4 sm:text-base">{tool.title}</h3>
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:mt-1.5 sm:text-sm">
+        {tool.description}
+      </p>
+    </Link>
+  );
+}
+
 export function ToolBrowser() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("All");
+  const [quickTool, setQuickTool] = useState<ToolMeta | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -31,6 +125,12 @@ export function ToolBrowser() {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("focus")) {
+      document.getElementById("tool-search")?.focus();
+    }
   }, []);
 
   const filtered = useMemo(() => {
@@ -51,36 +151,39 @@ export function ToolBrowser() {
 
   return (
     <div id="tools">
-      {/* Task chips */}
-      <div className="mb-5 -mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
-        {taskChips.map((chip) => (
-          <Link
-            key={chip.kit}
-            href={`/${chip.kit}`}
-            className="shrink-0 whitespace-nowrap rounded-full border border-border bg-card/70 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/40 hover:text-foreground active:scale-95"
-          >
-            {chip.label}
-          </Link>
-        ))}
-      </div>
-
-      {/* Search */}
-      <div className="relative mx-auto mb-5 max-w-md sm:mb-6">
-        <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          id="tool-search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search 57 tools…"
-          className="h-12 w-full rounded-2xl border border-border bg-card pr-16 pl-11 text-base shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary/50 focus:shadow-[0_8px_30px_-8px_var(--color-primary)] sm:text-sm"
-        />
-        <kbd className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:block">
-          ⌘K
-        </kbd>
+      {/* Command bar */}
+      <div className="mx-auto mb-6 max-w-xl rounded-[26px] border border-border bg-card p-4 shadow-[0_12px_36px_-16px_rgba(0,0,0,0.18)] sm:mb-8 sm:p-5">
+        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+          Ask GenRise
+        </p>
+        <div className="mt-2 flex items-center gap-2.5">
+          <Search className="size-4 shrink-0 text-muted-foreground" />
+          <input
+            id="tool-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Try “shrink a photo under 200kb”…"
+            className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground sm:text-sm"
+          />
+          <kbd className="hidden shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:block">
+            ⌘K
+          </kbd>
+        </div>
+        <div className={`mt-3 -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${edgeFade}`}>
+          {taskChips.map((chip) => (
+            <Link
+              key={chip.kit}
+              href={`/${chip.kit}`}
+              className="shrink-0 whitespace-nowrap rounded-full bg-muted/70 px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95"
+            >
+              {chip.label}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Category filters */}
-      <div className="mb-8 -mx-4 flex items-center gap-1.5 overflow-x-auto rounded-full border border-border bg-muted/60 p-1.5 px-4 [scrollbar-width:none] sm:mx-auto sm:w-fit sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-1.5 sm:mb-10 [&::-webkit-scrollbar]:hidden">
+      <div className={`mb-8 -mx-4 flex items-center gap-1.5 overflow-x-auto rounded-full border border-border bg-muted/60 p-1.5 px-4 [scrollbar-width:none] sm:mx-auto sm:w-fit sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-1.5 sm:mb-10 sm:[mask-image:none] sm:[-webkit-mask-image:none] [&::-webkit-scrollbar]:hidden ${edgeFade}`}>
         {filters.map((f) => (
           <button
             key={f}
@@ -108,22 +211,11 @@ export function ToolBrowser() {
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Popular tools
             </h2>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+            <div
+              className={`-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-3 sm:overflow-visible sm:px-0 sm:[mask-image:none] sm:[-webkit-mask-image:none] [&::-webkit-scrollbar]:hidden ${edgeFade}`}
+            >
               {popularTools.map((tool) => (
-                <Link
-                  key={tool.slug}
-                  href={`/tools/${tool.slug}`}
-                  className="group flex items-center gap-3 rounded-2xl border border-border/70 bg-card/70 p-3.5 backdrop-blur-sm transition-all active:scale-[0.98] sm:p-4 sm:hover:-translate-y-0.5 sm:hover:border-primary/40 sm:hover:shadow-lg"
-                >
-                  <div
-                    className={`flex size-9 shrink-0 items-center justify-center rounded-xl sm:size-10 ${categoryTileClass[tool.category]}`}
-                  >
-                    <tool.icon className="size-4.5 sm:size-5" strokeWidth={2} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{tool.title}</p>
-                  </div>
-                </Link>
+                <PopularToolCard key={tool.slug} tool={tool} onQuickActions={setQuickTool} />
               ))}
             </div>
           </motion.div>
@@ -154,34 +246,92 @@ export function ToolBrowser() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.3) }}
               >
-                <Link
-                  href={`/tools/${tool.slug}`}
-                  className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-border/70 bg-card/70 p-4 backdrop-blur-sm transition-all duration-300 active:scale-[0.98] sm:rounded-[28px] sm:p-5 sm:hover:-translate-y-1 sm:hover:border-transparent sm:hover:shadow-2xl sm:hover:shadow-primary/10"
-                >
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:rounded-[28px]"
-                    style={{
-                      padding: 1,
-                      background: "linear-gradient(135deg, var(--color-primary), transparent 60%)",
-                      WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                      WebkitMaskComposite: "xor",
-                      maskComposite: "exclude",
-                    }}
-                  />
-                  <div
-                    className={`flex size-11 items-center justify-center rounded-2xl shadow-inner sm:size-14 ${categoryTileClass[tool.category]}`}
-                  >
-                    <tool.icon className="size-5 sm:size-6" strokeWidth={2} />
-                  </div>
-                  <h3 className="mt-3 font-heading text-sm font-semibold sm:mt-4 sm:text-base">{tool.title}</h3>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:mt-1.5 sm:text-sm">
-                    {tool.description}
-                  </p>
-                </Link>
+                <ToolGridCard tool={tool} onQuickActions={setQuickTool} />
               </motion.div>
             ))}
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Long-press quick actions */}
+      <AnimatePresence>
+        {quickTool && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setQuickTool(null)}
+              className="fixed inset-0 z-[60] bg-background/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed inset-x-3 z-[61] overflow-hidden rounded-3xl border border-border bg-card p-3 shadow-2xl"
+              style={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom))" }}
+            >
+              <div className="flex items-center gap-3 border-b border-border px-2 pb-3">
+                <div
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${categoryTileClass[quickTool.category]}`}
+                >
+                  <quickTool.icon className="size-5" strokeWidth={2} />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">{quickTool.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">{quickTool.description}</p>
+                </div>
+              </div>
+              <div className="flex flex-col pt-1">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const url = `${window.location.origin}/tools/${quickTool.slug}`;
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({ title: quickTool.title, url });
+                      } catch {
+                        // user dismissed the share sheet — no action needed
+                      }
+                      setQuickTool(null);
+                    } else {
+                      await navigator.clipboard.writeText(url);
+                      setCopied(true);
+                      setTimeout(() => {
+                        setCopied(false);
+                        setQuickTool(null);
+                      }, 900);
+                    }
+                  }}
+                  className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium transition-colors active:bg-muted"
+                >
+                  <Share2 className="size-4 text-muted-foreground" />
+                  Share
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(`${window.location.origin}/tools/${quickTool.slug}`);
+                    setCopied(true);
+                    setTimeout(() => {
+                      setCopied(false);
+                      setQuickTool(null);
+                    }, 900);
+                  }}
+                  className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium transition-colors active:bg-muted"
+                >
+                  {copied ? (
+                    <Check className="size-4 text-primary" />
+                  ) : (
+                    <Link2 className="size-4 text-muted-foreground" />
+                  )}
+                  {copied ? "Copied!" : "Copy link"}
+                </button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>

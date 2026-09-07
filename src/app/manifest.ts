@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { siteUrl, siteName } from "@/lib/toolSeo";
+import { siteName } from "@/lib/toolSeo";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -52,6 +52,6 @@ export default function manifest(): MetadataRoute.Manifest {
         url: "/tools/qr-code",
       },
     ],
-    id: siteUrl,
+    id: "/",
   };
 }

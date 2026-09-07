@@ -6,12 +6,17 @@ import { KitsShowcase } from "@/components/kits-showcase";
 import { NewsletterCapture } from "@/components/newsletter-capture";
 import { AdSlot } from "@/components/ad-slot";
 import { HomeFaq } from "@/components/home-faq";
+import { HideInPwa } from "@/components/hide-in-pwa";
+import { PwaWelcome } from "@/components/pwa-welcome";
 
 export default function Home() {
   return (
     <>
       <StatsStrip />
-      <HomeHero />
+      <PwaWelcome />
+      <HideInPwa>
+        <HomeHero />
+      </HideInPwa>
       <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-6 px-4">
         <AdSlot className="mt-24" />
         <main className="flex w-full max-w-6xl flex-1 flex-col pb-20">
@@ -19,7 +24,9 @@ export default function Home() {
           <KitsShowcase />
           <NewsletterCapture />
           <WhyGenRise />
-          <HomeFaq />
+          <HideInPwa>
+            <HomeFaq />
+          </HideInPwa>
         </main>
         <AdSlot className="mt-24" />
       </div>

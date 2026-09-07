@@ -15,7 +15,9 @@ export function ShareButtons({ title, slug }: ShareButtonsProps) {
   const shareText = `${title} — free, browser-based, no uploads. Via GenRise`;
 
   function copyLink() {
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(url).catch(() => {
+      // clipboard blocked — still show copied state
+    });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }

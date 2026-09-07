@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { tools, toolCategories } from "@/lib/tools";
@@ -14,12 +15,16 @@ export function HomeHero() {
   return (
     <section className="relative pt-16 pb-8">
       {/* Grainy gradient background */}
-      <div
-        className="absolute inset-0 -z-10 bg-cover bg-center"
-        style={{
-          backgroundImage: "url(/hero-bg.png)",
-        }}
-      >
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <Image
+          src="/hero-bg.png"
+          alt=""
+          fill
+          priority
+          quality={45}
+          sizes="100vw"
+          className="object-cover object-center"
+        />
         <div className="absolute inset-0 bg-background/85" />
       </div>
 
