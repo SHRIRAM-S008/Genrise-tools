@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 import FileDropzone from "@/components/FileDropzone";
 import DownloadButton from "@/components/DownloadButton";
 import { removeImageBackground } from "@/lib/backgroundRemover";
+import { useObjectUrl } from "@/lib/useObjectUrl";
 
 export default function BackgroundRemoverPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -13,8 +14,8 @@ export default function BackgroundRemoverPage() {
   const [result, setResult] = useState<{ blob: Blob; filename: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const originalUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
-  const resultUrl = useMemo(() => (result ? URL.createObjectURL(result.blob) : null), [result]);
+  const originalUrl = useObjectUrl(file);
+  const resultUrl = useObjectUrl(result?.blob);
 
   async function run() {
     if (!file) return;

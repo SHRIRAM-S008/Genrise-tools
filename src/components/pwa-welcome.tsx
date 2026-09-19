@@ -33,7 +33,7 @@ function useGreeting() {
 }
 
 const shortcuts = tools.filter((t) =>
-  ["compress-image", "merge-pdf", "qr-code", "resume-builder"].includes(t.slug)
+  ["compress-image", "merge-pdf", "qr-code", "background-remover"].includes(t.slug)
 );
 
 export function PwaWelcome() {

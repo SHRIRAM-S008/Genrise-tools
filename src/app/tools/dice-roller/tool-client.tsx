@@ -2,14 +2,9 @@
 
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
+import { randomInt } from "@/lib/random";
 
 const DICE_TYPES = [4, 6, 8, 10, 12, 20];
-
-function randomInt(max: number): number {
-  const array = new Uint32Array(1);
-  crypto.getRandomValues(array);
-  return (array[0] % max) + 1;
-}
 
 export default function DiceRollerPage() {
   const [diceType, setDiceType] = useState(6);
@@ -18,12 +13,12 @@ export default function DiceRollerPage() {
   const [coin, setCoin] = useState<"Heads" | "Tails" | null>(null);
 
   function roll() {
-    const rolls = Array.from({ length: count }, () => randomInt(diceType));
+    const rolls = Array.from({ length: count }, () => randomInt(diceType) + 1);
     setResults(rolls);
   }
 
   function flipCoin() {
-    setCoin(randomInt(2) === 1 ? "Heads" : "Tails");
+    setCoin(randomInt(2) === 0 ? "Heads" : "Tails");
   }
 
   return (

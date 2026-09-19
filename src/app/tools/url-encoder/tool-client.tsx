@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
+import { CopyButton } from "@/components/copy-button";
 
 export default function UrlEncoderPage() {
   const [input, setInput] = useState("");
@@ -44,12 +45,16 @@ export default function UrlEncoderPage() {
       {error && <p className="text-destructive">{error}</p>}
 
       {output && (
-        <textarea
-          value={output}
-          readOnly
-          rows={8}
-          className="rounded-lg border border-border px-3 py-2 font-mono text-sm"
-        />
+        <div className="flex flex-col gap-2">
+          <textarea
+            value={output}
+            readOnly
+            rows={8}
+            aria-label="Output"
+            className="rounded-lg border border-border px-3 py-2 font-mono text-sm"
+          />
+          <CopyButton value={output} label="Copy output" />
+        </div>
       )}
     </ToolLayout>
   );

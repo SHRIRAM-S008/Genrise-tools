@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   images: {
     qualities: [45, 75],
   },
+  async redirects() {
+    return [
+      // Resume Builder was removed; keep old links and search results working.
+      { source: "/tools/resume-builder", destination: "/tools", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
@@ -13,7 +19,10 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-XSS-Protection", value: "1; mode=block" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // self is required: camera=() / microphone=() disables them for this
+          // origin too, which silently blocks the QR scanner and the voice
+          // and screen recorders before any permission prompt appears.
+          { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=()" },
         ],
       },
       {

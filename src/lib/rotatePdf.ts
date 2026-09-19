@@ -2,7 +2,7 @@ import { PDFDocument, degrees } from "pdf-lib";
 
 export async function rotateAllPages(file: File, angle: 90 | 180 | 270): Promise<{ blob: Blob; filename: string }> {
   const bytes = await file.arrayBuffer();
-  const doc = await PDFDocument.load(bytes);
+  const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
 
   for (const page of doc.getPages()) {
     const current = page.getRotation().angle;

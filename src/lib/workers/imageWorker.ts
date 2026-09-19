@@ -36,7 +36,8 @@ const paperSizesMm = {
 } as const;
 
 async function loadBitmap(file: File) {
-  const bitmap = await createImageBitmap(file);
+  // Matches loadImage() on the main thread: honour the EXIF orientation tag.
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   return { bitmap, width: bitmap.width, height: bitmap.height };
 }
 
@@ -245,8 +246,11 @@ async function opPrintSheet(file: File, options: PrintSheetOptions) {
   const margin = mmToPx(options.marginMm, dpi);
   const gap = mmToPx(options.gapMm, dpi);
 
-  const cols = Math.max(1, Math.floor((pageW - 2 * margin + gap) / (photoW + gap)));
-  const rows = Math.max(1, Math.floor((pageH - 2 * margin + gap) / (photoH + gap)));
+  const cols = Math.floor((pageW - 2 * margin + gap) / (photoW + gap));
+  const rows = Math.floor((pageH - 2 * margin + gap) / (photoH + gap));
+  if (cols < 1 || rows < 1) {
+    throw new Error("That photo size doesn't fit on this paper with the chosen margin.");
+  }
 
   const canvas = new OffscreenCanvas(pageW, pageH);
   const c = canvas.getContext("2d");
@@ -259,7 +263,13 @@ async function opPrintSheet(file: File, options: PrintSheetOptions) {
     for (let col = 0; col < cols; col++) {
       const x = margin + col * (photoW + gap);
       const y = margin + r * (photoH + gap);
-      c.drawImage(bitmap, x, y, photoW, photoH);
+      // Cover-crop so the printed photo keeps its aspect ratio.
+      const scale = Math.max(photoW / bitmap.width, photoH / bitmap.height);
+      const srcW = photoW / scale;
+      const srcH = photoH / scale;
+      const srcX = (bitmap.width - srcW) / 2;
+      const srcY = (bitmap.height - srcH) / 2;
+      c.drawImage(bitmap, srcX, srcY, srcW, srcH, x, y, photoW, photoH);
       c.strokeStyle = "#cccccc";
       c.strokeRect(x, y, photoW, photoH);
       copies++;

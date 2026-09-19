@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { Search, Share2, Link2, Check } from "lucide-react";
 import { tools, toolCategories, type ToolCategory, type ToolMeta } from "@/lib/tools";
-import { categoryTileClass, categoryGlowClass } from "@/lib/categoryStyles";
+import { categoryTileClass } from "@/lib/categoryStyles";
 
 type Filter = "All" | ToolCategory;
 
@@ -66,16 +66,7 @@ function PopularToolCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActi
       href={`/tools/${tool.slug}`}
       {...longPress}
       className="group relative flex w-[132px] shrink-0 snap-start flex-col items-start gap-2.5 overflow-hidden rounded-2xl border border-border/70 bg-card/70 p-3.5 transition-all duration-200 select-none active:scale-[0.98] sm:w-auto sm:flex-row sm:items-center sm:p-4 sm:hover:-translate-y-0.5 sm:hover:border-primary/30 sm:hover:bg-card sm:hover:shadow-lg"
-      style={{ "--spotlight": categoryGlowClass[tool.category] } as CSSProperties}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background:
-            "radial-gradient(220px circle at var(--x, 50%) var(--y, 50%), var(--spotlight), transparent 50%)",
-        }}
-      />
       <div
         className={`relative z-10 flex size-9 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 sm:size-10 ${categoryTileClass[tool.category]}`}
       >
@@ -93,34 +84,12 @@ function PopularToolCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActi
 function ToolGridCard({ tool, onQuickActions }: { tool: ToolMeta; onQuickActions: (t: ToolMeta) => void }) {
   const longPress = useLongPress(() => onQuickActions(tool));
 
-  function onMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--x", `${e.clientX - rect.left}px`);
-    e.currentTarget.style.setProperty("--y", `${e.clientY - rect.top}px`);
-  }
-
-  function onMouseLeave(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.currentTarget.style.setProperty("--x", "50%");
-    e.currentTarget.style.setProperty("--y", "50%");
-  }
-
   return (
     <Link
       href={`/tools/${tool.slug}`}
       {...longPress}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
       className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-border/70 bg-card/70 p-4 transition-all duration-300 select-none active:scale-[0.98] sm:rounded-[28px] sm:p-5 sm:hover:-translate-y-1 sm:hover:border-primary/20 sm:hover:bg-card sm:hover:shadow-2xl sm:hover:shadow-primary/5"
-      style={{ "--spotlight": categoryGlowClass[tool.category] } as CSSProperties}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:rounded-[28px]"
-        style={{
-          background:
-            "radial-gradient(420px circle at var(--x, 50%) var(--y, 50%), var(--spotlight), transparent 45%)",
-        }}
-      />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0 rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:rounded-[28px]"

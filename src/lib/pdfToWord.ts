@@ -66,18 +66,43 @@ export async function pdfToWord(file: File): Promise<{ blob: Blob; filename: str
     const lines: string[] = [];
     let currentLine = "";
     let lastY: number | null = null;
+    let lastEndX: number | null = null;
 
     for (const item of content.items) {
       if (!("str" in item)) continue;
       const transform = item.transform as number[];
+      const x = transform[4];
       const y = transform[5];
+      const fontHeight = Math.abs(transform[3]) || 10;
+      const itemWidth = "width" in item && typeof item.width === "number" ? item.width : 0;
 
-      if (lastY !== null && Math.abs(y - lastY) > 2) {
+      // A new baseline (or an explicit end-of-line marker) starts a new line.
+      if (lastY !== null && Math.abs(y - lastY) > fontHeight * 0.5) {
         lines.push(currentLine);
         currentLine = "";
+        lastEndX = null;
+      } else if (
+        lastEndX !== null &&
+        currentLine &&
+        !currentLine.endsWith(" ") &&
+        !item.str.startsWith(" ") &&
+        x - lastEndX > fontHeight * 0.2
+      ) {
+        // PDFs encode inter-word gaps as positioning, not space characters —
+        // without this, "Hello World" comes back as "HelloWorld".
+        currentLine += " ";
       }
+
       currentLine += item.str;
       lastY = y;
+      lastEndX = x + itemWidth;
+
+      if ("hasEOL" in item && item.hasEOL) {
+        lines.push(currentLine);
+        currentLine = "";
+        lastY = null;
+        lastEndX = null;
+      }
     }
     if (currentLine) lines.push(currentLine);
 

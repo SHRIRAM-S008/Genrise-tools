@@ -8,7 +8,11 @@ export async function decodeAudioFile(file: File): Promise<AudioBuffer> {
   }
 }
 
-export function drawWaveform(canvas: HTMLCanvasElement, buffer: AudioBuffer) {
+export function drawWaveform(
+  canvas: HTMLCanvasElement,
+  buffer: AudioBuffer,
+  selection?: { startSec: number; endSec: number }
+) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   const data = buffer.getChannelData(0);
@@ -18,6 +22,23 @@ export function drawWaveform(canvas: HTMLCanvasElement, buffer: AudioBuffer) {
   const mid = height / 2;
 
   ctx.clearRect(0, 0, width, height);
+
+  // Shade the part of the clip that will actually be exported.
+  if (selection && buffer.duration > 0) {
+    const startX = (selection.startSec / buffer.duration) * width;
+    const endX = (selection.endSec / buffer.duration) * width;
+    ctx.fillStyle = "rgba(120,120,255,0.15)";
+    ctx.fillRect(startX, 0, Math.max(1, endX - startX), height);
+    ctx.strokeStyle = "rgba(90,90,220,0.9)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(startX, 0);
+    ctx.lineTo(startX, height);
+    ctx.moveTo(endX, 0);
+    ctx.lineTo(endX, height);
+    ctx.stroke();
+  }
+
   ctx.fillStyle = "rgba(120,120,255,0.6)";
 
   for (let x = 0; x < width; x++) {
@@ -36,21 +57,41 @@ export function drawWaveform(canvas: HTMLCanvasElement, buffer: AudioBuffer) {
   }
 }
 
-export function trimAudioBuffer(buffer: AudioBuffer, startSec: number, endSec: number): AudioBuffer {
-  const ctx = new OfflineAudioContext(
-    buffer.numberOfChannels,
-    Math.max(1, Math.round((endSec - startSec) * buffer.sampleRate)),
-    buffer.sampleRate
-  );
-  const startFrame = Math.floor(startSec * buffer.sampleRate);
-  const endFrame = Math.floor(endSec * buffer.sampleRate);
-  const length = endFrame - startFrame;
+export interface TrimOptions {
+  /** Fade length in seconds, applied at both ends to avoid clicks. */
+  fadeSec?: number;
+}
 
-  const trimmed = ctx.createBuffer(buffer.numberOfChannels, length, buffer.sampleRate);
+export function trimAudioBuffer(
+  buffer: AudioBuffer,
+  startSec: number,
+  endSec: number,
+  options: TrimOptions = {}
+): AudioBuffer {
+  const sampleRate = buffer.sampleRate;
+  const startFrame = Math.max(0, Math.floor(startSec * sampleRate));
+  const endFrame = Math.min(buffer.length, Math.floor(endSec * sampleRate));
+  const length = Math.max(1, endFrame - startFrame);
+
+  // An OfflineAudioContext is only needed as a factory for createBuffer;
+  // a plain context of the right length is enough and far cheaper.
+  const ctx = new OfflineAudioContext(buffer.numberOfChannels, length, sampleRate);
+  const trimmed = ctx.createBuffer(buffer.numberOfChannels, length, sampleRate);
+
+  const fadeFrames = Math.min(Math.floor((options.fadeSec ?? 0) * sampleRate), Math.floor(length / 2));
+
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
     const source = buffer.getChannelData(ch).subarray(startFrame, endFrame);
-    trimmed.copyToChannel(new Float32Array(source), ch);
+    const samples = new Float32Array(source);
+
+    for (let i = 0; i < fadeFrames; i++) {
+      samples[i] *= i / fadeFrames;
+      samples[samples.length - 1 - i] *= i / fadeFrames;
+    }
+
+    trimmed.copyToChannel(samples, ch);
   }
+
   return trimmed;
 }
 

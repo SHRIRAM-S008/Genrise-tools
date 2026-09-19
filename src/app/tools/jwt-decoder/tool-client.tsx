@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 
 function base64UrlDecode(input: string): string {
@@ -25,7 +25,13 @@ export default function JwtDecoderPage() {
     }
   }, [token]);
 
-  const [now] = useState(() => Math.floor(Date.now() / 1000));
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+
+  // Keep "Expired / Valid" honest while the tab stays open.
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000);
+    return () => window.clearInterval(id);
+  }, []);
   const exp = decoded && decoded !== "error" ? decoded.payload?.exp : undefined;
   const iat = decoded && decoded !== "error" ? decoded.payload?.iat : undefined;
 

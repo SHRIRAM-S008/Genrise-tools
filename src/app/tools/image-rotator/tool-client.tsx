@@ -1,17 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 import FileDropzone from "@/components/FileDropzone";
 import DownloadButton from "@/components/DownloadButton";
 import { RotateCw, FlipHorizontal, FlipVertical } from "lucide-react";
 import { applyRotateFlip, type RotateFlipState } from "@/lib/imageRotator";
+import { useObjectUrl } from "@/lib/useObjectUrl";
 
 export default function ImageRotatorPage() {
   const [file, setFile] = useState<File | null>(null);
   const [state, setState] = useState<RotateFlipState>({ rotation: 0, flipH: false, flipV: false });
   const [result, setResult] = useState<{ blob: Blob; filename: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const previewUrl = useObjectUrl(result?.blob);
 
   async function apply(next: RotateFlipState, targetFile = file) {
     if (!targetFile) return;
@@ -24,8 +26,6 @@ export default function ImageRotatorPage() {
       setBusy(false);
     }
   }
-
-  const previewUrl = useMemo(() => (result ? URL.createObjectURL(result.blob) : null), [result]);
 
   return (
     <ToolLayout title="Image Rotator" description="Rotate or flip images by 90, 180, or 270 degrees.">

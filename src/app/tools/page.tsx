@@ -5,7 +5,7 @@ import { siteUrl, siteName } from "@/lib/toolSeo";
 export const metadata: Metadata = {
   title: "All Tools — Free Online Browser-Based Tools",
   description:
-    "Browse all free GenRise tools — image compression, PDF merging, QR codes, resume builder, and more. 100% browser-based, no sign-up, no server uploads.",
+    "Browse all free GenRise tools — image compression, PDF merging, QR codes, background removal, and more. 100% browser-based, no sign-up, no server uploads.",
   alternates: { canonical: `${siteUrl}/tools` },
   openGraph: {
     title: `All Tools — ${siteName}`,
@@ -13,11 +13,13 @@ export const metadata: Metadata = {
       "Browse all free browser-based tools for files, images, PDFs, and documents.",
     url: `${siteUrl}/tools`,
     type: "website",
+    images: [{ url: `${siteUrl}/og/tools`, width: 1200, height: 630, alt: `All Tools — ${siteName}` }],
   },
   twitter: {
     card: "summary_large_image",
     title: `All Tools — ${siteName}`,
     description: "Browse all free browser-based tools — no sign-up, no uploads.",
+    images: [`${siteUrl}/og/tools`],
   },
 };
 

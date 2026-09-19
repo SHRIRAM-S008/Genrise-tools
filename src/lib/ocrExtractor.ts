@@ -3,6 +3,23 @@ export interface OcrProgress {
   progress: number;
 }
 
+/** Tesseract traineddata codes, downloaded on demand at first use. */
+export const OCR_LANGUAGES = [
+  { code: "eng", label: "English" },
+  { code: "spa", label: "Spanish" },
+  { code: "fra", label: "French" },
+  { code: "deu", label: "German" },
+  { code: "por", label: "Portuguese" },
+  { code: "ita", label: "Italian" },
+  { code: "nld", label: "Dutch" },
+  { code: "hin", label: "Hindi" },
+  { code: "ara", label: "Arabic" },
+  { code: "chi_sim", label: "Chinese (Simplified)" },
+  { code: "jpn", label: "Japanese" },
+  { code: "kor", label: "Korean" },
+  { code: "rus", label: "Russian" },
+] as const;
+
 async function renderPdfPagesToCanvases(file: File): Promise<HTMLCanvasElement[]> {
   const pdfjsLib = await import("pdfjs-dist");
   pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
@@ -29,11 +46,12 @@ async function renderPdfPagesToCanvases(file: File): Promise<HTMLCanvasElement[]
 
 export async function extractText(
   file: File,
-  onProgress?: (p: OcrProgress) => void
+  onProgress?: (p: OcrProgress) => void,
+  language = "eng"
 ): Promise<string> {
   const { createWorker } = await import("tesseract.js");
 
-  const worker = await createWorker("eng", 1, {
+  const worker = await createWorker(language, 1, {
     logger: (m) => onProgress?.({ status: m.status, progress: m.progress }),
   });
 

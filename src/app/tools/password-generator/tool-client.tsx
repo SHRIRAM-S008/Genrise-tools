@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
+import { CopyButton } from "@/components/copy-button";
+import { randomInt, randomItem, shuffle } from "@/lib/random";
 
 const CHARSETS = {
   upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -14,25 +16,23 @@ export default function PasswordGeneratorPage() {
   const [length, setLength] = useState(16);
   const [options, setOptions] = useState({ upper: true, lower: true, numbers: true, symbols: true });
   const [password, setPassword] = useState("");
-  const [copied, setCopied] = useState(false);
 
   function toggle(key: keyof typeof options) {
     setOptions((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
   function generate() {
-    const charset = (Object.keys(options) as (keyof typeof options)[])
-      .filter((k) => options[k])
-      .map((k) => CHARSETS[k])
-      .join("");
+    const enabled = (Object.keys(options) as (keyof typeof options)[]).filter((k) => options[k]);
+    if (!enabled.length) return;
 
-    if (!charset) return;
+    const charset = enabled.map((k) => CHARSETS[k]).join("");
 
-    const bytes = new Uint32Array(length);
-    crypto.getRandomValues(bytes);
-    const result = Array.from(bytes, (b) => charset[b % charset.length]).join("");
-    setPassword(result);
-    setCopied(false);
+    // One character from every enabled class first, so "include symbols"
+    // actually guarantees a symbol, then fill the rest and shuffle.
+    const picked = enabled.slice(0, length).map((k) => randomItem(CHARSETS[k].split("")));
+    while (picked.length < length) picked.push(charset[randomInt(charset.length)]);
+
+    setPassword(shuffle(picked).join(""));
   }
 
   return (
@@ -68,15 +68,7 @@ export default function PasswordGeneratorPage() {
       {password && (
         <div className="flex items-center justify-between gap-3 rounded-2xl border border-border p-5">
           <span className="break-all font-mono text-sm">{password}</span>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(password);
-              setCopied(true);
-            }}
-            className="shrink-0 rounded-full border border-border px-4 py-2 text-sm font-medium hover:border-primary/40"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
+          <CopyButton value={password} label="Copy" className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium hover:border-primary/40" />
         </div>
       )}
     </ToolLayout>

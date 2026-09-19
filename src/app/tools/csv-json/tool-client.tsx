@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
+import { CopyButton } from "@/components/copy-button";
 import { csvToJson, jsonToCsv, formatJson, minifyJson } from "@/lib/csvJson";
 
 type Mode = "csv-to-json" | "json-to-csv" | "format-json" | "minify-json";
@@ -43,6 +44,7 @@ export default function CsvJsonPage() {
     a.href = url;
     a.download = isCsv ? "output.csv" : "output.json";
     a.click();
+    URL.revokeObjectURL(url);
   }
 
   const modes: { id: Mode; label: string }[] = [
@@ -85,10 +87,13 @@ export default function CsvJsonPage() {
       {output && (
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium">Output</span>
-          <textarea readOnly value={output} rows={8} className="rounded-lg border border-border px-3 py-2 font-mono text-sm" />
-          <button onClick={download} className="w-fit rounded-full border border-border px-5 py-2 text-sm font-medium">
-            Download
-          </button>
+          <textarea readOnly value={output} rows={8} aria-label="Output" className="rounded-lg border border-border px-3 py-2 font-mono text-sm" />
+          <div className="flex flex-wrap gap-2">
+            <CopyButton value={output} label="Copy output" />
+            <button onClick={download} className="w-fit rounded-full border border-border px-5 py-2 text-sm font-medium">
+              Download
+            </button>
+          </div>
         </div>
       )}
     </ToolLayout>

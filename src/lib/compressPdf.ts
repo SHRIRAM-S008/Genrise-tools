@@ -34,7 +34,7 @@ export async function compressPdf(file: File, options: CompressPdfOptions = {}):
 /** Fallback when Web Workers are unavailable: structure-only compression. */
 async function compressPdfOnMainThread(file: File): Promise<CompressPdfResult> {
   const bytes = await file.arrayBuffer();
-  const doc = await PDFDocument.load(bytes);
+  const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const pdfBytes = await doc.save({ useObjectStreams: true });
   return {
     blob: new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" }),

@@ -17,18 +17,24 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
   );
 }
 
+function num(value: string): number | null {
+  if (value.trim() === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export default function PercentageCalculatorPage() {
   const [x1, setX1] = useState("");
   const [y1, setY1] = useState("");
-  const r1 = x1 !== "" && y1 !== "" ? (Number(x1) / 100) * Number(y1) : null;
+  const r1 = num(x1) !== null && num(y1) !== null ? (num(x1)! / 100) * num(y1)! : null;
 
   const [x2, setX2] = useState("");
   const [y2, setY2] = useState("");
-  const r2 = x2 !== "" && y2 !== "" && Number(y2) !== 0 ? (Number(x2) / Number(y2)) * 100 : null;
+  const r2 = num(x2) !== null && num(y2) ? (num(x2)! / num(y2)!) * 100 : null;
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const r3 = from !== "" && to !== "" && Number(from) !== 0 ? ((Number(to) - Number(from)) / Number(from)) * 100 : null;
+  const r3 = num(from) && num(to) !== null ? ((num(to)! - num(from)!) / num(from)!) * 100 : null;
 
   return (
     <ToolLayout title="Percentage Calculator" description="Calculate percentages, increase, decrease, and ratios.">

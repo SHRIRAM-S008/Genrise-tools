@@ -8,7 +8,7 @@ export default function CronExplainerPage() {
   const [expr, setExpr] = useState("*/15 9-17 * * 1-5");
 
   const parsed = useMemo(() => parseCron(expr), [expr]);
-  const nextRuns = useMemo(() => (parsed ? nextRunTimes(parsed.fields, 5) : []), [parsed]);
+  const nextRuns = useMemo(() => (parsed ? nextRunTimes(parsed, 5) : []), [parsed]);
 
   return (
     <ToolLayout title="Cron Expression Explainer" description="Turn a cron expression into plain English and see upcoming run times.">

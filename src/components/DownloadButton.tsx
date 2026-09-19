@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ interface DownloadButtonProps {
 
 export default function DownloadButton({ blob, filename, label = "Download" }: DownloadButtonProps) {
   const url = useMemo(() => URL.createObjectURL(blob), [blob]);
+
+  useEffect(() => () => URL.revokeObjectURL(url), [url]);
 
   return (
     <motion.div

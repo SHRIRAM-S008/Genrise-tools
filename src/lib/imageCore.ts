@@ -7,7 +7,9 @@ export interface LoadedImage {
 }
 
 export async function loadImage(file: File): Promise<LoadedImage> {
-  const bitmap = await createImageBitmap(file);
+  // `from-image` applies the EXIF orientation tag, so photos shot in portrait
+  // on a phone don't come out sideways once they're redrawn through a canvas.
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   return { bitmap, width: bitmap.width, height: bitmap.height };
 }
 

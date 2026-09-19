@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 import FileDropzone from "@/components/FileDropzone";
-import DownloadButton from "@/components/DownloadButton";
+import { ImageResult } from "@/components/image-result";
 import { buildPrintSheet } from "@/lib/printSheet";
 import type { PaperSizeId } from "@/lib/photoSizes";
 
@@ -22,6 +22,7 @@ export default function PrintSheetPage() {
     if (!file) return;
     setBusy(true);
     setError(null);
+    setResult(null);
     try {
       const output = await buildPrintSheet(file, {
         paper,
@@ -31,8 +32,12 @@ export default function PrintSheetPage() {
         gapMm: gap,
       });
       setResult(output);
-    } catch {
-      setError("Couldn't build a print sheet from that image.");
+    } catch (err) {
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Couldn't build a print sheet from that image."
+      );
     } finally {
       setBusy(false);
     }
@@ -86,12 +91,11 @@ export default function PrintSheetPage() {
       {error && <p className="text-destructive">{error}</p>}
 
       {result && (
-        <div className="rounded-2xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">{result.copies} copies fit on this sheet.</p>
-          <div className="mt-3">
-            <DownloadButton blob={result.blob} filename={result.filename} />
-          </div>
-        </div>
+        <ImageResult
+          blob={result.blob}
+          filename={result.filename}
+          note={`${result.copies} copies on one ${paper} sheet`}
+        />
       )}
     </ToolLayout>
   );

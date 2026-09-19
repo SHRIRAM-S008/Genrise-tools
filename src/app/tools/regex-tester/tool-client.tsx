@@ -21,15 +21,22 @@ export default function RegexTesterPage() {
     const found: RegExpMatchArray[] = [];
     let lastIndex = 0;
     const parts: string[] = [];
+    const MAX_MATCHES = 1000;
 
     for (const match of text.matchAll(regex)) {
-      found.push(match);
       const start = match.index ?? 0;
       const end = start + match[0].length;
-      parts.push(escapeHtml(text.slice(lastIndex, start)));
-      parts.push(`<mark class="rounded bg-primary/30 text-inherit">${escapeHtml(match[0])}</mark>`);
-      lastIndex = end;
-      if (match[0].length === 0) break;
+
+      // Zero-length matches (e.g. /^/gm or /\b/g) are real matches; they just
+      // can't be highlighted, so count them and keep scanning.
+      if (end > start) {
+        parts.push(escapeHtml(text.slice(lastIndex, start)));
+        parts.push(`<mark class="rounded bg-primary/30 text-inherit">${escapeHtml(match[0])}</mark>`);
+        lastIndex = end;
+      }
+
+      found.push(match);
+      if (found.length >= MAX_MATCHES) break;
     }
     parts.push(escapeHtml(text.slice(lastIndex)));
 
@@ -88,7 +95,8 @@ export default function RegexTesterPage() {
           <ul className="flex flex-col gap-2 text-sm">
             {matches.map((m, i) => (
               <li key={i} className="rounded-lg border border-border px-3 py-2">
-                <span className="font-mono">{m[0]}</span>
+                <span className="mr-2 text-xs text-muted-foreground">@{m.index ?? 0}</span>
+                <span className="font-mono">{m[0] === "" ? "(empty match)" : m[0]}</span>
                 {m.length > 1 && (
                   <span className="ml-2 text-muted-foreground">
                     groups: {m.slice(1).map((g) => g ?? "—").join(", ")}

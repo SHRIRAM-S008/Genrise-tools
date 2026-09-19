@@ -73,7 +73,6 @@ export interface OutputSample {
     | "terminal"
     | "waveform"
     | "screen"
-    | "resume"
     | "invoice"
     | "file-list"
     | "gpa"
@@ -329,11 +328,6 @@ export const toolSamples: Record<string, ToolSample> = {
   },
 
   // ---------- Documents ----------
-  "resume-builder": {
-    kind: "output",
-    render: "resume",
-    note: "Fill the form → print-ready PDF",
-  },
   "invoice-generator": {
     kind: "output",
     render: "invoice",

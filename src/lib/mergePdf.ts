@@ -19,7 +19,7 @@ async function mergePdfsOnMainThread(files: File[]): Promise<MergePdfResult> {
 
   for (const file of files) {
     const bytes = await file.arrayBuffer();
-    const doc = await PDFDocument.load(bytes);
+    const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
     const pages = await merged.copyPages(doc, doc.getPageIndices());
     pages.forEach((page) => merged.addPage(page));
   }

@@ -1,6 +1,9 @@
+const WORDS_PER_MINUTE = 200;
+
 export function countStats(text: string) {
-  const words = text.trim().length ? text.trim().split(/\s+/) : [];
-  const sentences = text.trim().length ? text.split(/[.!?]+\s*/).filter(Boolean) : [];
+  const trimmed = text.trim();
+  const words = trimmed ? trimmed.split(/\s+/) : [];
+  const sentences = trimmed ? trimmed.split(/[.!?]+[\s]*/).filter((s) => s.trim().length) : [];
   const lines = text.length ? text.split(/\r\n|\r|\n/) : [];
   return {
     characters: text.length,
@@ -8,7 +11,8 @@ export function countStats(text: string) {
     words: words.length,
     sentences: sentences.length,
     lines: lines.length,
-    readingTimeMinutes: Math.max(1, Math.round(words.length / 200)),
+    // 0 for empty text; anything non-empty rounds up to at least a minute.
+    readingTimeMinutes: words.length ? Math.max(1, Math.round(words.length / WORDS_PER_MINUTE)) : 0,
   };
 }
 

@@ -10,6 +10,7 @@ import { RegisterServiceWorker } from "@/components/register-sw";
 import { InstallPrompt } from "@/components/install-prompt";
 import { PwaInstallProvider } from "@/components/pwa-install-context";
 import { siteUrl, siteName, siteTagline } from "@/lib/toolSeo";
+import { tools } from "@/lib/tools";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +42,6 @@ export const metadata: Metadata = {
     "image compressor",
     "pdf tools online",
     "qr code generator",
-    "resume builder online",
     "invoice generator",
     "csv to json converter",
     "metadata remover",
@@ -106,7 +106,9 @@ export const metadata: Metadata = {
     "ai:privacy": "on-device",
     "ai:pricing": "free",
     "format-detection": "telephone=no",
-    "google-site-verification": process.env.GOOGLE_SITE_VERIFICATION ?? "",
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { "google-site-verification": process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
   },
 };
 
@@ -122,6 +124,8 @@ const organizationJsonLd = {
   ],
 };
 
+// No SearchAction: Google retired the sitelinks search box rich result in
+// October 2024, and the target here never resolved to a real search endpoint.
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -129,11 +133,6 @@ const websiteJsonLd = {
   url: siteUrl,
   description,
   sameAs: "https://github.com/SHRIRAM-S008/Genrise-tools",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: `${siteUrl}/?q={search_term_string}`,
-    "query-input": "required name=search_term_string",
-  },
 };
 
 export const viewport: Viewport = {
@@ -151,7 +150,14 @@ const itemListJsonLd = {
   "@type": "ItemList",
   name: `${siteName} Tools`,
   description: "Complete list of free browser-based tools available on GenRise",
-  url: siteUrl,
+  url: `${siteUrl}/tools`,
+  numberOfItems: tools.length,
+  itemListElement: tools.map((tool, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: tool.title,
+    url: `${siteUrl}/tools/${tool.slug}`,
+  })),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

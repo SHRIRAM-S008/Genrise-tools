@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ToolMeta } from "@/lib/tools";
 import { tools } from "@/lib/tools";
 import { categoryTileClass } from "@/lib/categoryStyles";
-import { siteUrl } from "@/lib/toolSeo";
+import { getToolSeoOverride } from "@/lib/toolSeoOverrides";
 
 interface ToolSeoContentProps {
   tool: ToolMeta;
@@ -115,6 +115,8 @@ export function ToolSeoContent({ tool }: ToolSeoContentProps) {
 }
 
 function getAboutText(tool: ToolMeta): string {
+  const override = getToolSeoOverride(tool.slug);
+  if (override?.about) return override.about;
   const base = `${tool.title} is a free online tool on GenRise that lets you ${tool.description.toLowerCase()} `;
   const privacy = `Unlike other online tools, ${tool.title} processes everything directly in your browser — your files are never uploaded to a server, ensuring complete privacy and security. `;
   const speed = `This means it's not only more private but also faster, since there's no upload or download wait time. `;
@@ -123,6 +125,8 @@ function getAboutText(tool: ToolMeta): string {
 }
 
 function getFeatures(tool: ToolMeta): string[] {
+  const override = getToolSeoOverride(tool.slug);
+  if (override?.features) return override.features;
   return [
     `Free with no sign-up or account required`,
     `100% browser-based — your files never leave your device`,
@@ -134,6 +138,8 @@ function getFeatures(tool: ToolMeta): string[] {
 }
 
 function getUseCases(tool: ToolMeta): string[] {
+  const override = getToolSeoOverride(tool.slug);
+  if (override?.useCases) return override.useCases;
   const common: Record<string, string[]> = {
     Images: [
       "Preparing photos for online forms and applications",
@@ -148,9 +154,9 @@ function getUseCases(tool: ToolMeta): string[] {
       "Converting images to PDF for document submission",
     ],
     Documents: [
-      "Creating professional resumes for job applications",
-      "Generating invoices for freelance work",
-      "Bundling application documents into one package",
+      "Generating invoices for freelance and client work",
+      "Bundling job-application documents into one package",
+      "Previewing and exporting Markdown documents",
       "Calculating academic GPA scores",
     ],
     "Data & Text": [

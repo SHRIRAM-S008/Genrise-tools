@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ToolMeta } from "./tools";
+import { getToolSeoOverride } from "./toolSeoOverrides";
 
 export const siteUrl = "https://tools.genrisetech.in";
 export const siteName = "GenRise";
@@ -7,15 +8,19 @@ export const siteTagline =
   "Free Browser-Based Tools for Files, Images & PDFs";
 
 export function buildToolMetadata(tool: ToolMeta): Metadata {
-  const title = `${tool.title} — Free Online Tool`;
-  const description = `${tool.description} Free, private, and browser-based — no sign-up, no uploads to a server.`;
+  const override = getToolSeoOverride(tool.slug);
+  const title = override?.title ?? `${tool.title} — Free Online Tool`;
+  const description =
+    override?.description ??
+    `${tool.description} Free, private, and browser-based — no sign-up, no uploads to a server.`;
   const url = `${siteUrl}/tools/${tool.slug}`;
-  const ogImage = `${siteUrl}/logo.avif`;
+  const ogImage = `${siteUrl}/og/${tool.slug}`;
 
   return {
     title,
     description,
     keywords: [
+      ...(override?.keywords ?? []),
       tool.title.toLowerCase(),
       `free ${tool.title.toLowerCase()}`,
       `${tool.title.toLowerCase()} online`,
@@ -63,7 +68,11 @@ export interface ToolFaqItem {
 }
 
 export function buildToolFaqs(tool: ToolMeta): ToolFaqItem[] {
+  const override = getToolSeoOverride(tool.slug);
   return [
+    // Tool-specific questions lead, since they match the sharpest search
+    // intent; the generic free/private/mobile answers still follow.
+    ...(override?.faqs ?? []),
     {
       question: `Is ${tool.title} free to use?`,
       answer: `Yes. ${tool.title} is completely free on ${siteName}, with no limits, watermarks, or hidden paywalls.`,
@@ -107,7 +116,7 @@ export function toolBreadcrumbJsonLd(tool: ToolMeta) {
         "@type": "ListItem",
         position: 2,
         name: "Tools",
-        item: `${siteUrl}/#tools`,
+        item: `${siteUrl}/tools`,
       },
       {
         "@type": "ListItem",
@@ -171,15 +180,26 @@ export function toolHowToJsonLd(tool: ToolMeta) {
 export function toolJsonLd(tool: ToolMeta) {
   const url = `${siteUrl}/tools/${tool.slug}`;
   const faqs = buildToolFaqs(tool);
+  const override = getToolSeoOverride(tool.slug);
 
   return [
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
+      "@type": "WebPage",
+      name: override?.title ?? tool.title,
+      description: tool.description,
+      url,
+      inLanguage: "en",
+      isPartOf: { "@type": "WebSite", name: siteName, url: siteUrl },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
       name: tool.title,
       description: tool.description,
       url,
-      applicationCategory: "BrowserApplication",
+      applicationCategory: tool.category,
+      browserRequirements: "Requires a modern browser with JavaScript enabled",
       operatingSystem: "Any (runs in web browser)",
       codeRepository: "https://github.com/SHRIRAM-S008/Genrise-tools",
       offers: {
@@ -193,13 +213,9 @@ export function toolJsonLd(tool: ToolMeta) {
         name: siteName,
         url: siteUrl,
       },
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "4.8",
-        ratingCount: "100",
-        bestRating: "5",
-        worstRating: "1",
-      },
+      // No aggregateRating: GenRise doesn't collect ratings, and inventing
+      // review markup breaches Google's structured-data policy (risking a
+      // site-wide manual action). Add it back only from real reviews.
     },
     {
       "@context": "https://schema.org",
@@ -253,7 +269,7 @@ export function homeFaqJsonLd() {
     {
       question: "What types of tools does GenRise offer?",
       answer:
-        "GenRise offers tools for image compression, resizing, and conversion; PDF merging, compression, and organization; document creation like resumes and invoices; data tools like CSV/JSON conversion and QR codes; and privacy tools like metadata removal.",
+        "GenRise offers tools for image compression, resizing, and conversion; PDF merging, compression, and organization; document creation like invoices and application packs; data tools like CSV/JSON conversion and QR codes; and privacy tools like metadata removal.",
     },
   ];
 

@@ -10,12 +10,29 @@ function inline(s: string): string {
   let out = escapeHtml(s);
   out = out.replace(/`([^`]+)`/g, "<code>$1</code>");
   out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  out = out.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  out = out.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
+  out = out.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+  out = out.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_m, alt, src) => {
+    const safeSrc = /^https?:\/\//i.test(src) ? src : "";
+    return safeSrc ? `<img src="${safeSrc}" alt="${alt}" />` : escapeHtml(alt);
+  });
   out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, label, href) => {
     const safeHref = /^https?:\/\//i.test(href) ? href : "#";
     return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">${label}</a>`;
   });
   return out;
+}
+
+function tableRowCells(line: string): string[] {
+  return line
+    .trim()
+    .replace(/^\||\|$/g, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function isTableDivider(line: string): boolean {
+  return /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(line);
 }
 
 export function renderMarkdown(source: string): string {
@@ -25,21 +42,17 @@ export function renderMarkdown(source: string): string {
   let inCodeBlock = false;
   let codeLines: string[] = [];
   let listBuffer: string[] = [];
-  let inQuote = false;
+  let listType: "ul" | "ol" = "ul";
 
   function flushList() {
-    if (listBuffer.length) {
-      html.push(`<ul>${listBuffer.map((li) => `<li>${inline(li)}</li>`).join("")}</ul>`);
-      listBuffer = [];
-    }
+    if (!listBuffer.length) return;
+    const items = listBuffer.map((li) => `<li>${inline(li)}</li>`).join("");
+    html.push(`<${listType}>${items}</${listType}>`);
+    listBuffer = [];
   }
 
-  function flushQuote() {
-    inQuote = false;
-  }
-
-  for (const rawLine of lines) {
-    const line = rawLine;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
 
     if (line.trim().startsWith("```")) {
       if (inCodeBlock) {
@@ -58,6 +71,25 @@ export function renderMarkdown(source: string): string {
       continue;
     }
 
+    // GitHub-style table: a header row followed by a |---|---| divider.
+    if (line.includes("|") && i + 1 < lines.length && isTableDivider(lines[i + 1])) {
+      flushList();
+      const headers = tableRowCells(line);
+      const bodyRows: string[][] = [];
+      let cursor = i + 2;
+      while (cursor < lines.length && lines[cursor].includes("|") && lines[cursor].trim()) {
+        bodyRows.push(tableRowCells(lines[cursor]));
+        cursor++;
+      }
+      const head = headers.map((h) => `<th>${inline(h)}</th>`).join("");
+      const body = bodyRows
+        .map((row) => `<tr>${row.map((cell) => `<td>${inline(cell)}</td>`).join("")}</tr>`)
+        .join("");
+      html.push(`<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`);
+      i = cursor - 1;
+      continue;
+    }
+
     const heading = line.match(/^(#{1,6})\s+(.*)$/);
     if (heading) {
       flushList();
@@ -66,24 +98,35 @@ export function renderMarkdown(source: string): string {
       continue;
     }
 
-    const listItem = line.match(/^\s*[-*]\s+(.*)$/);
+    if (/^\s*([-*_])\1{2,}\s*$/.test(line)) {
+      flushList();
+      html.push("<hr />");
+      continue;
+    }
+
+    const orderedItem = line.match(/^\s*\d+[.)]\s+(.*)$/);
+    if (orderedItem) {
+      if (listType !== "ol") flushList();
+      listType = "ol";
+      listBuffer.push(orderedItem[1]);
+      continue;
+    }
+
+    const listItem = line.match(/^\s*[-*+]\s+(.*)$/);
     if (listItem) {
+      if (listType !== "ul") flushList();
+      listType = "ul";
       listBuffer.push(listItem[1]);
       continue;
     }
     flushList();
 
     if (line.trim().startsWith(">")) {
-      inQuote = true;
       html.push(`<blockquote>${inline(line.replace(/^\s*>\s?/, ""))}</blockquote>`);
       continue;
     }
-    if (inQuote && line.trim() === "") flushQuote();
 
-    if (line.trim() === "") {
-      html.push("");
-      continue;
-    }
+    if (line.trim() === "") continue;
 
     html.push(`<p>${inline(line)}</p>`);
   }

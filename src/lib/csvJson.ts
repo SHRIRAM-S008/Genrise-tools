@@ -19,9 +19,16 @@ export function jsonToCsv(json: string): string {
   const headers = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
   const lines = [headers.map(escapeCsvCell).join(",")];
   for (const row of rows) {
-    lines.push(headers.map((h) => escapeCsvCell(String(row[h] ?? ""))).join(","));
+    lines.push(headers.map((h) => escapeCsvCell(stringifyCell(row[h]))).join(","));
   }
   return lines.join("\n");
+}
+
+/** Nested objects/arrays keep their JSON shape rather than "[object Object]". */
+function stringifyCell(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
 }
 
 function escapeCsvCell(value: string): string {

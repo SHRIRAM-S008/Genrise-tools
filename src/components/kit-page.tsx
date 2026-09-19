@@ -88,11 +88,13 @@ export function kitMetadata(slug: KitSlug) {
       description: kit.description,
       url,
       type: "website",
+      images: [{ url: `${siteUrl}/og/${slug}`, width: 1200, height: 630, alt: `${kit.title} — ${siteName}` }],
     },
     twitter: {
       card: "summary_large_image" as const,
       title: `${kit.title} — Free ${siteName} Tools`,
       description: kit.description,
+      images: [`${siteUrl}/og/${slug}`],
     },
   };
 }

@@ -16,7 +16,7 @@ async function opMergePdfs(files: File[]) {
   const merged = await PDFDocument.create();
   for (const file of files) {
     const bytes = await file.arrayBuffer();
-    const doc = await PDFDocument.load(bytes);
+    const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
     const pages = await merged.copyPages(doc, doc.getPageIndices());
     pages.forEach((page) => merged.addPage(page));
   }
@@ -25,15 +25,75 @@ async function opMergePdfs(files: File[]) {
 }
 
 // ---- images to pdf ----
-async function opImagesToPdf(files: File[]) {
+type PdfPageSize = "image" | "A4" | "Letter";
+
+interface ImagesToPdfOptions {
+  pageSize?: PdfPageSize;
+  marginMm?: number;
+}
+
+const PX_TO_PT = 72 / 96;
+const MM_TO_PT = 72 / 25.4;
+
+const PAGE_SIZES_PT: Record<Exclude<PdfPageSize, "image">, [number, number]> = {
+  A4: [595.28, 841.89],
+  Letter: [612, 792],
+};
+
+/** pdf-lib embeds PNG/JPEG only; re-encode anything else the browser decodes. */
+async function toEmbeddableBytes(file: File): Promise<{ bytes: ArrayBuffer; isPng: boolean }> {
+  if (file.type === "image/png") return { bytes: await file.arrayBuffer(), isPng: true };
+  if (file.type === "image/jpeg") return { bytes: await file.arrayBuffer(), isPng: false };
+
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const c = canvas.getContext("2d");
+  if (!c) throw new Error("2D context not supported");
+  c.fillStyle = "#ffffff";
+  c.fillRect(0, 0, canvas.width, canvas.height);
+  c.drawImage(bitmap, 0, 0);
+  bitmap.close();
+  const blob = await canvas.convertToBlob({ type: "image/jpeg", quality: 0.92 });
+  return { bytes: await blob.arrayBuffer(), isPng: false };
+}
+
+async function opImagesToPdf(files: File[], options: ImagesToPdfOptions = {}) {
+  const pageSize = options.pageSize ?? "A4";
+  const marginPt = (options.marginMm ?? 0) * MM_TO_PT;
   const pdfDoc = await PDFDocument.create();
+
   for (const file of files) {
-    const bytes = await file.arrayBuffer();
-    const isPng = file.type === "image/png";
+    const { bytes, isPng } = await toEmbeddableBytes(file);
     const image = isPng ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
-    const page = pdfDoc.addPage([image.width, image.height]);
-    page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+
+    if (pageSize === "image") {
+      const width = image.width * PX_TO_PT;
+      const height = image.height * PX_TO_PT;
+      const page = pdfDoc.addPage([width, height]);
+      page.drawImage(image, { x: 0, y: 0, width, height });
+      continue;
+    }
+
+    const [pw, ph] = PAGE_SIZES_PT[pageSize];
+    const landscape = image.width > image.height;
+    const pageWidth = landscape ? ph : pw;
+    const pageHeight = landscape ? pw : ph;
+    const page = pdfDoc.addPage([pageWidth, pageHeight]);
+
+    const scale = Math.min(
+      (pageWidth - marginPt * 2) / image.width,
+      (pageHeight - marginPt * 2) / image.height
+    );
+    const width = image.width * scale;
+    const height = image.height * scale;
+    page.drawImage(image, {
+      x: (pageWidth - width) / 2,
+      y: (pageHeight - height) / 2,
+      width,
+      height,
+    });
   }
+
   const pdfBytes = await pdfDoc.save();
   return { blob: toBlob(pdfBytes), filename: "images.pdf" };
 }
@@ -47,7 +107,7 @@ interface PdfPageState {
 
 async function opRebuildPdf(file: File, pages: PdfPageState[]) {
   const bytes = await file.arrayBuffer();
-  const source = await PDFDocument.load(bytes);
+  const source = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const output = await PDFDocument.create();
 
   const active = pages.filter((p) => !p.deleted);
@@ -85,7 +145,7 @@ async function opCompressPdf(file: File, options: CompressPdfOptions) {
   const maxWidth = options.maxWidth ?? 1600;
 
   const bytes = await file.arrayBuffer();
-  const doc = await PDFDocument.load(bytes);
+  const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const context = doc.context;
 
   let imagesCompressed = 0;
@@ -160,8 +220,8 @@ ctx.onmessage = async (event: MessageEvent<IncomingMessage>) => {
         break;
       }
       case "imagesToPdf": {
-        const p = payload as unknown as { files: File[] };
-        result = await opImagesToPdf(p.files);
+        const p = payload as unknown as { files: File[]; options?: ImagesToPdfOptions };
+        result = await opImagesToPdf(p.files, p.options);
         break;
       }
       case "rebuildPdf": {

@@ -6,7 +6,7 @@ import { ToolFaq } from "@/components/tool-faq";
 import { ToolSeoContent } from "@/components/tool-seo-content";
 import ToolClient from "./tool-client";
 
-const tool = tools.find((t) => t.slug === "resume-builder")!;
+const tool = tools.find((t) => t.slug === "qr-scanner")!;
 
 export const metadata: Metadata = buildToolMetadata(tool);
 

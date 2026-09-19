@@ -41,7 +41,7 @@ export default function ZipCreatorPage() {
           {files.map((f, i) => (
             <li key={i} className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
               <span className="truncate">{f.name} <span className="text-muted-foreground">({formatBytes(f.size)})</span></span>
-              <button onClick={() => remove(i)} className="text-muted-foreground hover:text-destructive">Remove</button>
+              <button aria-label={`Remove ${f.name}`} onClick={() => remove(i)} className="text-muted-foreground hover:text-destructive">Remove</button>
             </li>
           ))}
         </ul>

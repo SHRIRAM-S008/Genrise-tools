@@ -14,7 +14,7 @@ export interface RebuildPdfResult {
 
 export async function getPageCount(file: File): Promise<number> {
   const bytes = await file.arrayBuffer();
-  const doc = await PDFDocument.load(bytes);
+  const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
   return doc.getPageCount();
 }
 
@@ -28,7 +28,7 @@ export async function rebuildPdf(file: File, pages: PdfPageState[]): Promise<Reb
 
 async function rebuildPdfOnMainThread(file: File, pages: PdfPageState[]): Promise<RebuildPdfResult> {
   const bytes = await file.arrayBuffer();
-  const source = await PDFDocument.load(bytes);
+  const source = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const output = await PDFDocument.create();
 
   const active = pages.filter((p) => !p.deleted);

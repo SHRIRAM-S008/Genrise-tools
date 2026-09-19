@@ -37,8 +37,11 @@ async function buildPrintSheetOnMainThread(file: File, options: PrintSheetOption
   const margin = mmToPx(options.marginMm, dpi);
   const gap = mmToPx(options.gapMm, dpi);
 
-  const cols = Math.max(1, Math.floor((pageW - 2 * margin + gap) / (photoW + gap)));
-  const rows = Math.max(1, Math.floor((pageH - 2 * margin + gap) / (photoH + gap)));
+  const cols = Math.floor((pageW - 2 * margin + gap) / (photoW + gap));
+  const rows = Math.floor((pageH - 2 * margin + gap) / (photoH + gap));
+  if (cols < 1 || rows < 1) {
+    throw new Error("That photo size doesn't fit on this paper with the chosen margin.");
+  }
 
   const canvas = document.createElement("canvas");
   canvas.width = pageW;
@@ -53,7 +56,14 @@ async function buildPrintSheetOnMainThread(file: File, options: PrintSheetOption
     for (let c = 0; c < cols; c++) {
       const x = margin + c * (photoW + gap);
       const y = margin + r * (photoH + gap);
-      ctx.drawImage(bitmap, x, y, photoW, photoH);
+      // Cover-crop the source so the printed photo keeps its aspect ratio
+      // instead of being stretched into the requested box.
+      const scale = Math.max(photoW / bitmap.width, photoH / bitmap.height);
+      const srcW = photoW / scale;
+      const srcH = photoH / scale;
+      const srcX = (bitmap.width - srcW) / 2;
+      const srcY = (bitmap.height - srcH) / 2;
+      ctx.drawImage(bitmap, srcX, srcY, srcW, srcH, x, y, photoW, photoH);
       ctx.strokeStyle = "#cccccc";
       ctx.strokeRect(x, y, photoW, photoH);
       copies++;

@@ -4,7 +4,16 @@ import { useMemo, useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 import { convertUnit, unitOptions, type UnitCategory } from "@/lib/unitConverter";
 
-const CATEGORIES: UnitCategory[] = ["length", "weight", "temperature"];
+const CATEGORIES: UnitCategory[] = [
+  "length",
+  "weight",
+  "temperature",
+  "area",
+  "volume",
+  "speed",
+  "data",
+  "time",
+];
 
 export default function UnitConverterPage() {
   const [category, setCategory] = useState<UnitCategory>("length");
@@ -19,9 +28,11 @@ export default function UnitConverterPage() {
   }
 
   const result = useMemo(() => {
+    if (value.trim() === "") return null;
     const num = Number(value);
-    if (Number.isNaN(num)) return null;
-    return convertUnit(category, num, from, to);
+    if (!Number.isFinite(num)) return null;
+    const converted = convertUnit(category, num, from, to);
+    return Number.isFinite(converted) ? converted : null;
   }, [category, from, to, value]);
 
   return (
@@ -71,6 +82,16 @@ export default function UnitConverterPage() {
           </select>
         </label>
       </div>
+
+      <button
+        onClick={() => {
+          setFrom(to);
+          setTo(from);
+        }}
+        className="w-fit rounded-full border border-border px-4 py-2 text-sm font-medium hover:border-primary/40"
+      >
+        Swap units
+      </button>
 
       {result !== null && (
         <div className="rounded-2xl border border-border p-5">

@@ -34,7 +34,7 @@ const faqs = [
   {
     question: "What types of tools does GenRise offer?",
     answer:
-      "GenRise offers tools for image compression, resizing, and conversion; PDF merging, compression, and organization; document creation like resumes and invoices; data tools like CSV/JSON conversion and QR codes; and privacy tools like metadata removal.",
+      "GenRise offers tools for image compression, resizing, and conversion; PDF merging, compression, and organization; document creation like invoices and application packs; data tools like CSV/JSON conversion and QR codes; and privacy tools like metadata removal.",
   },
 ];
 

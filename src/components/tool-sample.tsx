@@ -387,17 +387,6 @@ function OutputDemo({ sample }: { sample: Extract<ToolSample, { kind: "output" }
           <div className="h-full w-full rounded bg-zinc-800" />
         </div>
       );
-    case "resume":
-      return (
-        <div className="w-full max-w-xs rounded-lg border border-border bg-white p-3 text-[10px] leading-tight text-zinc-700">
-          <div className="mb-1 border-b border-zinc-200 pb-1 font-bold text-zinc-900">
-            ADA LOVELACE
-          </div>
-          <div className="text-[9px] text-zinc-500">Software Engineer · ada@x.com</div>
-          <div className="mt-2 font-semibold">Experience</div>
-          <div className="text-zinc-600">Senior Engineer · Acme (2022—now)</div>
-        </div>
-      );
     case "invoice":
       return (
         <div className="w-full max-w-xs rounded-lg border border-border bg-white p-3 text-[10px] leading-tight text-zinc-700">

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
+import { daysBetween, parseDateInput, todayInputValue } from "@/lib/dateInput";
 
 function diff(birth: Date, asOf: Date) {
   let years = asOf.getFullYear() - birth.getFullYear();
@@ -18,19 +19,18 @@ function diff(birth: Date, asOf: Date) {
     months += 12;
   }
 
-  const totalDays = Math.floor((asOf.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24));
+  const totalDays = daysBetween(birth, asOf);
   return { years, months, days, totalDays };
 }
 
 export default function AgeCalculatorPage() {
   const [birthDate, setBirthDate] = useState("");
-  const [asOfDate, setAsOfDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [asOfDate, setAsOfDate] = useState(todayInputValue);
 
   const result = useMemo(() => {
-    if (!birthDate || !asOfDate) return null;
-    const birth = new Date(birthDate);
-    const asOf = new Date(asOfDate);
-    if (birth > asOf) return null;
+    const birth = parseDateInput(birthDate);
+    const asOf = parseDateInput(asOfDate);
+    if (!birth || !asOf || birth > asOf) return null;
     return diff(birth, asOf);
   }, [birthDate, asOfDate]);
 

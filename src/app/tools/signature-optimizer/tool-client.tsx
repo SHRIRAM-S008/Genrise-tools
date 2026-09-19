@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 import FileDropzone from "@/components/FileDropzone";
-import DownloadButton from "@/components/DownloadButton";
+import { ImageResult } from "@/components/image-result";
 import { CheckCircle2 } from "lucide-react";
 import { optimizeToTargetKb, type TargetKbResult } from "@/lib/targetKb";
 
@@ -89,7 +89,12 @@ export default function SignatureOptimizerPage() {
       {error && <p className="text-destructive">{error}</p>}
 
       {result && (
-        <div className="rounded-2xl border border-border p-5">
+        <ImageResult
+          blob={result.blob}
+          filename={result.filename}
+          originalSize={file?.size}
+          dimensions={{ width, height }}
+        >
           <p className={`flex items-center gap-1.5 text-sm ${result.achieved ? "text-primary" : "text-amber-600"}`}>
             {result.achieved ? (
               <>
@@ -99,10 +104,7 @@ export default function SignatureOptimizerPage() {
               `Closest we could get: ${result.sizeKb} KB (target ${targetKb} KB)`
             )}
           </p>
-          <div className="mt-3">
-            <DownloadButton blob={result.blob} filename={result.filename} />
-          </div>
-        </div>
+        </ImageResult>
       )}
     </ToolLayout>
   );

@@ -2,21 +2,15 @@
 
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
+import { CopyButton } from "@/components/copy-button";
 
 export default function UuidGeneratorPage() {
   const [count, setCount] = useState(5);
   const [uuids, setUuids] = useState<string[]>([]);
-  const [copied, setCopied] = useState(false);
 
   function generate() {
     const list = Array.from({ length: Math.max(1, Math.min(count, 100)) }, () => crypto.randomUUID());
     setUuids(list);
-    setCopied(false);
-  }
-
-  function copyAll() {
-    navigator.clipboard.writeText(uuids.join("\n"));
-    setCopied(true);
   }
 
   return (
@@ -43,20 +37,17 @@ export default function UuidGeneratorPage() {
         <div className="rounded-2xl border border-border p-5">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{uuids.length} UUID(s)</span>
-            <button onClick={copyAll} className="rounded-full border border-border px-4 py-2 text-sm font-medium hover:border-primary/40">
-              {copied ? "Copied!" : "Copy all"}
-            </button>
+            <CopyButton value={uuids.join("\n")} label="Copy all" />
           </div>
           <ul className="flex flex-col gap-1 font-mono text-sm">
             {uuids.map((u, i) => (
               <li key={i} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 hover:bg-accent/40">
                 <span>{u}</span>
-                <button
-                  onClick={() => navigator.clipboard.writeText(u)}
-                  className="text-xs text-muted-foreground hover:text-primary"
-                >
-                  Copy
-                </button>
+                <CopyButton
+                  value={u}
+                  label="Copy"
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                />
               </li>
             ))}
           </ul>

@@ -43,7 +43,7 @@ export function HomeHero() {
           transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           className="mt-5 text-lg text-muted-foreground sm:text-xl"
         >
-          Compress images, merge PDFs, build resumes, generate QR codes, and more.
+          Compress images, merge PDFs, remove backgrounds, generate QR codes, and more.
           Nothing you upload here ever leaves your device.
         </motion.p>
         <motion.div

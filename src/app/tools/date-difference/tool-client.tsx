@@ -2,19 +2,20 @@
 
 import { useMemo, useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
+import { daysBetween, parseDateInput } from "@/lib/dateInput";
 
 export default function DateDifferencePage() {
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
   const result = useMemo(() => {
-    if (!start || !end) return null;
-    const a = new Date(start);
-    const b = new Date(end);
+    const a = parseDateInput(start);
+    const b = parseDateInput(end);
+    if (!a || !b) return null;
     const earlier = a <= b ? a : b;
     const later = a <= b ? b : a;
 
-    const totalDays = Math.round((later.getTime() - earlier.getTime()) / (1000 * 60 * 60 * 24));
+    const totalDays = daysBetween(earlier, later);
 
     let years = later.getFullYear() - earlier.getFullYear();
     let months = later.getMonth() - earlier.getMonth();

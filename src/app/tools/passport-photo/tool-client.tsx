@@ -6,6 +6,7 @@ import FileDropzone from "@/components/FileDropzone";
 import DownloadButton from "@/components/DownloadButton";
 import { generatePassportPhoto } from "@/lib/passportPhoto";
 import { photoSizes } from "@/lib/photoSizes";
+import { useObjectUrl } from "@/lib/useObjectUrl";
 
 export default function PassportPhotoPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -17,7 +18,7 @@ export default function PassportPhotoPage() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ blob: Blob; filename: string; widthPx: number; heightPx: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previewUrl = useObjectUrl(result?.blob);
 
   const selectedSize = photoSizes.find((s) => s.id === sizeId)!;
   const widthMm = sizeId === "custom" ? customW : selectedSize.widthMm;
@@ -30,7 +31,6 @@ export default function PassportPhotoPage() {
     try {
       const output = await generatePassportPhoto(file, { widthMm, heightMm, background, zoom });
       setResult(output);
-      setPreviewUrl(URL.createObjectURL(output.blob));
     } catch {
       setError("Couldn't generate a passport photo from that image.");
     } finally {

@@ -20,7 +20,7 @@ export async function inspectFile(file: File): Promise<FileInfoResult> {
 
   if (file.type.startsWith("image/")) {
     try {
-      const bitmap = await createImageBitmap(file);
+      const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
       base.width = bitmap.width;
       base.height = bitmap.height;
     } catch {

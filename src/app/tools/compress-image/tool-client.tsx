@@ -3,79 +3,102 @@
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 import FileDropzone from "@/components/FileDropzone";
-import DownloadButton from "@/components/DownloadButton";
+import { ImageResult } from "@/components/image-result";
+import { BatchResults, type BatchOutput } from "@/components/batch-results";
 import { compressImage } from "@/lib/compressImage";
-import { formatBytes } from "@/lib/imageCore";
+import { runBatch, toBatchItems, type BatchItem } from "@/lib/batch";
 
 export default function CompressImagePage() {
-  const [file, setFile] = useState<File | null>(null);
+  const [items, setItems] = useState<BatchItem<BatchOutput>[]>([]);
   const [maxSizeMB, setMaxSizeMB] = useState(1);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ blob: Blob; filename: string } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [stale, setStale] = useState(false);
 
-  async function run(selected: File) {
+  const single = items.length === 1 ? items[0] : null;
+
+  async function process(next: BatchItem<BatchOutput>[], target: number) {
     setBusy(true);
-    setError(null);
-    setResult(null);
-    try {
-      const output = await compressImage(selected, { maxSizeMB });
-      setResult(output);
-    } catch {
-      setError("Couldn't compress that image. Try a different file.");
-    } finally {
-      setBusy(false);
-    }
+    setStale(false);
+    const queued = next.map((item) => ({ ...item, status: "queued" as const, result: undefined, error: undefined }));
+    setItems(queued);
+    await runBatch(queued, (file) => compressImage(file, { maxSizeMB: target }), (updated) =>
+      setItems((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
+    );
+    setBusy(false);
+  }
+
+  function addFiles(files: File[]) {
+    const next = [...items, ...toBatchItems<BatchOutput>(files, items.length)];
+    setItems(next);
+    void process(next, maxSizeMB);
   }
 
   return (
     <ToolLayout
       title="Compress Image"
-      description="Reduce a JPG, PNG, or WebP file's size, entirely in your browser."
+      description="Reduce one image — or a whole batch — entirely in your browser."
     >
       <FileDropzone
         accept="image/jpeg,image/png,image/webp"
-        onFiles={(files) => {
-          setFile(files[0]);
-          run(files[0]);
-        }}
-        label={file ? file.name : "Click or drop an image here"}
-        hint="JPG, PNG, or WebP"
+        multiple
+        onFiles={addFiles}
+        label={items.length ? `${items.length} image(s) selected` : "Click or drop images here"}
+        hint="JPG, PNG, or WebP — drop several at once"
       />
 
-      <label className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Target max size (MB)</span>
-        <input
-          type="number"
-          min={0.05}
-          step={0.1}
-          value={maxSizeMB}
-          onChange={(e) => setMaxSizeMB(Number(e.target.value))}
-          className="w-32 rounded-lg border border-border px-3 py-2"
-        />
-      </label>
-      {file && (
-        <button
-          onClick={() => run(file)}
-          disabled={busy}
-          className="w-fit rounded-full bg-secondary px-5 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50"
-        >
-          {busy ? "Compressing…" : "Re-compress"}
-        </button>
-      )}
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="flex flex-col gap-2">
+          <span className="text-sm font-medium">Target max size (MB)</span>
+          <input
+            type="number"
+            min={0.05}
+            step={0.1}
+            value={maxSizeMB}
+            onChange={(e) => {
+              setMaxSizeMB(Number(e.target.value));
+              setStale(true);
+            }}
+            className="w-32 rounded-lg border border-border px-3 py-2"
+          />
+        </label>
 
-      {error && <p className="text-destructive">{error}</p>}
-
-      {result && (
-        <div className="rounded-2xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">
-            Original: {file && formatBytes(file.size)} → New: {formatBytes(result.blob.size)}
-          </p>
-          <div className="mt-3">
-            <DownloadButton blob={result.blob} filename={result.filename} />
+        {items.length > 0 && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => process(items, maxSizeMB)}
+              disabled={busy}
+              className={`rounded-full px-5 py-2.5 text-sm font-medium disabled:opacity-50 ${
+                stale ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              }`}
+            >
+              {busy ? "Compressing…" : stale ? "Apply new target" : "Re-compress all"}
+            </button>
+            <button
+              onClick={() => setItems([])}
+              className="rounded-full border border-border px-5 py-2.5 text-sm font-medium"
+            >
+              Clear
+            </button>
           </div>
-        </div>
+        )}
+      </div>
+
+      {single && single.status === "done" && single.result ? (
+        <ImageResult
+          blob={single.result.blob}
+          filename={single.result.filename}
+          originalSize={single.file.size}
+          note={stale ? "Settings changed — re-compress to apply" : undefined}
+        />
+      ) : (
+        <BatchResults
+          items={items}
+          zipName="compressed-images.zip"
+          onRemove={(id) => setItems((prev) => prev.filter((i) => i.id !== id))}
+        />
       )}
+
+      {single?.status === "error" && <p className="text-destructive">{single.error}</p>}
     </ToolLayout>
   );
 }
